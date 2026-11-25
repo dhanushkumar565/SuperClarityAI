@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <!-- Custom Stylesheet -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/glow-cursor.css') }}">
 </head>
 <body class="dark-theme">
     <!-- Animated Glowing Background Blobs -->
@@ -1131,6 +1132,8 @@
         </div>
     </aside>
 
+    <!-- Glow Cursor (WebGL2 fluid light trail) -->
+    <script src="{{ url_for('static', filename='js/glow-cursor.js') }}"></script>
     <!-- Main Controller Script -->
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 </body>
