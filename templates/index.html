@@ -51,6 +51,9 @@
             <button type="button" class="tab-nav-btn active" data-tab="tab-upscaler">
                 <i class="fa-solid fa-maximize"></i> AI Upscaler (2× / 4× / 8×)
             </button>
+            <button type="button" class="tab-nav-btn" data-tab="tab-assistant" id="tab-btn-assistant">
+                <i class="fa-solid fa-headset"></i> AI Retail Assistant
+            </button>
             <button type="button" class="tab-nav-btn" data-tab="tab-studio">
                 <i class="fa-solid fa-wand-magic"></i> AI Studio Editor
             </button>
@@ -386,6 +389,121 @@
                     </div>
                 </div>
             </main>
+        </section>
+
+        <!-- ================================================================= -->
+        <!-- TAB: AI RETAIL ASSISTANT WORKBENCH (Top Primary Workspace) -->
+        <!-- ================================================================= -->
+        <section class="tab-content" id="tab-assistant">
+            <div class="assistant-workspace-grid">
+                <!-- Left: Full Conversational Agent -->
+                <div class="glass-card assistant-main-card">
+                    <div class="card-header">
+                        <div class="header-left">
+                            <div class="agent-avatar"><i class="fa-solid fa-robot"></i></div>
+                            <div>
+                                <h3>SuperClarity Retail Assistant</h3>
+                                <p class="card-subtitle"><span class="status-dot"></span> Online · Multilingual Vision AI Grounded in E-Commerce Standards</p>
+                            </div>
+                        </div>
+                        <div class="assistant-header-actions">
+                            <select id="tab-chat-lang-select" class="lang-select">
+                                <option value="auto">🌐 Auto Detect</option>
+                                <option value="en" selected>🇬🇧 English</option>
+                                <option value="te">🇮🇳 తెలుగు</option>
+                                <option value="hi">🇮🇳 हिंदी</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Telemetry Ribbon -->
+                    <div class="telemetry-ribbon" id="tab-telemetry-ribbon">
+                        <i class="fa-solid fa-link"></i>
+                        <span id="tab-telemetry-ribbon-text">Synchronized with Active Image Session</span>
+                    </div>
+
+                    <!-- Quick Query Chips -->
+                    <div class="chat-chips-scroll">
+                        <button type="button" class="chat-chip tab-chat-chip" data-query="Is this image catalog ready for Amazon?">
+                            <i class="fa-brands fa-amazon"></i> Amazon Ready?
+                        </button>
+                        <button type="button" class="chat-chip tab-chat-chip" data-query="Explain the SSIM and sharpness scores for this image">
+                            <i class="fa-solid fa-chart-line"></i> Explain Metrics
+                        </button>
+                        <button type="button" class="chat-chip tab-chat-chip" data-query="What export settings should I use for Shopify?">
+                            <i class="fa-brands fa-shopify"></i> Shopify Settings
+                        </button>
+                        <button type="button" class="chat-chip tab-chat-chip" data-query="ఈ చిత్రం నాణ్యత అమెజాన్ ప్రమాణాలకు సరిపోతుందా?">
+                            🇮🇳 తెలుగులో విశ్లేషించండి
+                        </button>
+                        <button type="button" class="chat-chip tab-chat-chip" data-query="अमेज़न कैटलॉग नियम क्या हैं?">
+                            🇮🇳 अमेज़न नियम
+                        </button>
+                    </div>
+
+                    <!-- Conversation Stream -->
+                    <div class="chat-messages" id="tab-chat-messages" style="min-height: 380px; max-height: 480px;">
+                        <div class="chat-bubble bot-bubble">
+                            <div class="bubble-header">
+                                <span class="sender-name">SuperClarity AI</span>
+                                <span class="bubble-lang">English</span>
+                            </div>
+                            <div class="bubble-body">
+                                Hello! I am your retail catalog AI assistant. I can inspect image quality scores, explain super-resolution telemetry, provide marketplace export advice, or troubleshoot low-resolution vendor assets. Feel free to type or speak in English, తెలుగు, or हिंदी.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Voice Recording Indicator -->
+                    <div class="voice-status-bar hidden" id="tab-voice-status-bar">
+                        <div class="recording-pulse"></div>
+                        <span id="tab-voice-status-text">Listening to voice input...</span>
+                    </div>
+
+                    <!-- Input Console -->
+                    <div class="chat-input-bar">
+                        <button type="button" class="btn-voice-record" id="btn-tab-voice-toggle" title="Voice Input (STT)">
+                            <i class="fa-solid fa-microphone"></i>
+                        </button>
+                        <input type="text" id="tab-chat-text-input" placeholder="Ask about quality, Amazon rules, or speak in any language...">
+                        <button type="button" class="btn-chat-send" id="btn-tab-chat-send" title="Send Query">
+                            <i class="fa-solid fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Right: Retail Intelligence & Compliance Reference -->
+                <div class="glass-card assistant-info-card">
+                    <div class="card-header">
+                        <div class="header-left">
+                            <i class="fa-solid fa-book-bookmark card-icon"></i>
+                            <div>
+                                <h3>Retail Compliance Guide</h3>
+                                <p class="card-subtitle">Marketplace Standards & ML Diagnostics</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="compliance-guidelines-list">
+                        <div class="guide-item">
+                            <div class="guide-title"><i class="fa-brands fa-amazon" style="color: #f59e0b;"></i> Amazon Marketplace</div>
+                            <p>Minimum 1000px, 2000px recommended for 1:1 zoom. Mandatory pure white (<code>#FFFFFF</code>) background. Product must occupy at least 85% of the frame.</p>
+                        </div>
+                        <div class="guide-item">
+                            <div class="guide-title"><i class="fa-brands fa-shopify" style="color: #10b981;"></i> Shopify Storefront</div>
+                            <p>Up to 2048×2048 px. WebP format recommended for high compression ratio and ultra-fast mobile loading.</p>
+                        </div>
+                        <div class="guide-item">
+                            <div class="guide-title"><i class="fa-solid fa-chart-simple" style="color: #38bdf8;"></i> Super-Resolution Telemetry</div>
+                            <p><strong>SSIM ≥ 0.90:</strong> Authentic structural preservation.<br><strong>Tenengrad Sharpness:</strong> Boost tracking edge clarity across barcodes and fine typography.</p>
+                        </div>
+                        <div class="guide-item">
+                            <div class="guide-title"><i class="fa-solid fa-language" style="color: #a855f7;"></i> Multilingual Intelligence</div>
+                            <p>Instant query detection and voice responses in English, Telugu (తెలుగు), and Hindi (हिंदी).</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </section>
 
         <!-- ================================================================= -->

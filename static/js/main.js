@@ -190,6 +190,16 @@ document.addEventListener("DOMContentLoaded", () => {
     const telemetryRibbonText = document.getElementById("telemetry-ribbon-text");
     const chatChips = document.querySelectorAll(".chat-chip");
 
+    // Top Tab Assistant References
+    const tabChatMessages = document.getElementById("tab-chat-messages");
+    const tabChatTextInput = document.getElementById("tab-chat-text-input");
+    const btnTabChatSend = document.getElementById("btn-tab-chat-send");
+    const btnTabVoiceToggle = document.getElementById("btn-tab-voice-toggle");
+    const tabVoiceStatusBar = document.getElementById("tab-voice-status-bar");
+    const tabChatLangSelect = document.getElementById("tab-chat-lang-select");
+    const tabTelemetryRibbonText = document.getElementById("tab-telemetry-ribbon-text");
+    const tabChatChips = document.querySelectorAll(".tab-chat-chip");
+
     // =================================================================
     // 1. TAB ROUTING & THEME TOGGLE
     // =================================================================
@@ -1134,45 +1144,89 @@ document.addEventListener("DOMContentLoaded", () => {
     let speechRecognition = null;
 
     btnHeaderAssistant.addEventListener("click", () => {
-        chatDrawer.classList.remove("hidden");
-        chatBackdrop.classList.remove("hidden");
+        const tabBtn = document.querySelector('[data-tab="tab-assistant"]');
+        if (tabBtn) {
+            tabBtn.click();
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        } else if (chatDrawer && chatBackdrop) {
+            chatDrawer.classList.remove("hidden");
+            chatBackdrop.classList.remove("hidden");
+        }
     });
 
-    btnCloseDrawer.addEventListener("click", () => {
-        chatDrawer.classList.add("hidden");
-        chatBackdrop.classList.add("hidden");
-    });
+    if (btnCloseDrawer) {
+        btnCloseDrawer.addEventListener("click", () => {
+            chatDrawer.classList.add("hidden");
+            chatBackdrop.classList.add("hidden");
+        });
+    }
 
-    chatBackdrop.addEventListener("click", () => {
-        chatDrawer.classList.add("hidden");
-        chatBackdrop.classList.add("hidden");
-    });
+    if (chatBackdrop) {
+        chatBackdrop.addEventListener("click", () => {
+            chatDrawer.classList.add("hidden");
+            chatBackdrop.classList.add("hidden");
+        });
+    }
 
-    chatLangSelect.addEventListener("change", (e) => {
-        currentChatLang = e.target.value;
-    });
+    if (chatLangSelect) {
+        chatLangSelect.addEventListener("change", (e) => {
+            currentChatLang = e.target.value;
+            if (tabChatLangSelect) tabChatLangSelect.value = currentChatLang;
+        });
+    }
+
+    if (tabChatLangSelect) {
+        tabChatLangSelect.addEventListener("change", (e) => {
+            currentChatLang = e.target.value;
+            if (chatLangSelect) chatLangSelect.value = currentChatLang;
+        });
+    }
 
     chatChips.forEach(chip => {
         chip.addEventListener("click", () => {
-            chatTextInput.value = chip.dataset.query;
+            if (chatTextInput) chatTextInput.value = chip.dataset.query;
+            if (tabChatTextInput) tabChatTextInput.value = chip.dataset.query;
             sendChatMessage();
         });
     });
 
-    btnChatSend.addEventListener("click", () => sendChatMessage());
-    chatTextInput.addEventListener("keydown", (e) => {
-        if (e.key === "Enter") {
-            e.preventDefault();
+    tabChatChips.forEach(chip => {
+        chip.addEventListener("click", () => {
+            if (chatTextInput) chatTextInput.value = chip.dataset.query;
+            if (tabChatTextInput) tabChatTextInput.value = chip.dataset.query;
             sendChatMessage();
-        }
+        });
     });
 
+    if (btnChatSend) btnChatSend.addEventListener("click", () => sendChatMessage());
+    if (btnTabChatSend) btnTabChatSend.addEventListener("click", () => sendChatMessage());
+
+    if (chatTextInput) {
+        chatTextInput.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                sendChatMessage();
+            }
+        });
+    }
+
+    if (tabChatTextInput) {
+        tabChatTextInput.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                sendChatMessage();
+            }
+        });
+    }
+
     function sendChatMessage() {
-        const msg = chatTextInput.value.trim();
+        const msg = (chatTextInput ? chatTextInput.value.trim() : "") ||
+                    (tabChatTextInput ? tabChatTextInput.value.trim() : "");
         if (!msg) return;
 
         appendMessage("user", msg, "You");
-        chatTextInput.value = "";
+        if (chatTextInput) chatTextInput.value = "";
+        if (tabChatTextInput) tabChatTextInput.value = "";
 
         const context = {
             active_sample: selectedSampleId,
@@ -1195,13 +1249,12 @@ document.addEventListener("DOMContentLoaded", () => {
             if (d.success) {
                 appendMessage("bot", d.reply, "SuperClarity AI", d.language_name, d.speech_text);
             }
-        });
+        })
+        .catch(err => console.error("Chat error:", err));
     }
 
     function appendMessage(sender, text, senderName, langName = "", speechText = "") {
-        const div = document.createElement("div");
-        div.className = `chat-bubble ${sender === "user" ? "user-bubble" : "bot-bubble"}`;
-        div.innerHTML = `
+        const bubbleHtml = `
             <div class="bubble-header">
                 <span class="sender-name">${senderName}</span>
                 ${langName ? `<span class="bubble-lang">${langName}</span>` : ""}
@@ -1209,12 +1262,27 @@ document.addEventListener("DOMContentLoaded", () => {
             <div class="bubble-body">${text}</div>
             ${speechText ? `<button type="button" class="btn-speech-play" data-speech="${encodeURIComponent(speechText)}"><i class="fa-solid fa-volume-high"></i> Listen</button>` : ""}
         `;
-        chatMessages.appendChild(div);
-        chatMessages.scrollTop = chatMessages.scrollHeight;
+
+        if (chatMessages) {
+            const div = document.createElement("div");
+            div.className = `chat-bubble ${sender === "user" ? "user-bubble" : "bot-bubble"}`;
+            div.innerHTML = bubbleHtml;
+            chatMessages.appendChild(div);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        if (tabChatMessages) {
+            const divTab = document.createElement("div");
+            divTab.className = `chat-bubble ${sender === "user" ? "user-bubble" : "bot-bubble"}`;
+            divTab.innerHTML = bubbleHtml;
+            tabChatMessages.appendChild(divTab);
+            tabChatMessages.scrollTop = tabChatMessages.scrollHeight;
+        }
     }
 
-    if (chatMessages) {
-        chatMessages.addEventListener("click", (e) => {
+    function setupSpeechListeners(container) {
+        if (!container) return;
+        container.addEventListener("click", (e) => {
             const btn = e.target.closest(".btn-speech-play");
             if (btn && btn.dataset.speech) {
                 const text = decodeURIComponent(btn.dataset.speech);
@@ -1223,6 +1291,9 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
     }
+
+    setupSpeechListeners(chatMessages);
+    setupSpeechListeners(tabChatMessages);
 
     // Web Speech API STT
     const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -1233,27 +1304,35 @@ document.addEventListener("DOMContentLoaded", () => {
 
         speechRecognition.onresult = (e) => {
             const transcript = e.results[0][0].transcript;
-            chatTextInput.value = transcript;
+            if (chatTextInput) chatTextInput.value = transcript;
+            if (tabChatTextInput) tabChatTextInput.value = transcript;
             sendChatMessage();
         };
 
         speechRecognition.onend = () => {
             isRecording = false;
-            btnVoiceToggle.classList.remove("recording");
-            voiceStatusBar.classList.add("hidden");
+            if (btnVoiceToggle) btnVoiceToggle.classList.remove("recording");
+            if (btnTabVoiceToggle) btnTabVoiceToggle.classList.remove("recording");
+            if (voiceStatusBar) voiceStatusBar.classList.add("hidden");
+            if (tabVoiceStatusBar) tabVoiceStatusBar.classList.add("hidden");
         };
 
-        btnVoiceToggle.addEventListener("click", () => {
+        const toggleRecording = () => {
             if (!isRecording) {
                 speechRecognition.lang = currentChatLang === "te" ? "te-IN" : (currentChatLang === "hi" ? "hi-IN" : "en-US");
                 speechRecognition.start();
                 isRecording = true;
-                btnVoiceToggle.classList.add("recording");
-                voiceStatusBar.classList.remove("hidden");
+                if (btnVoiceToggle) btnVoiceToggle.classList.add("recording");
+                if (btnTabVoiceToggle) btnTabVoiceToggle.classList.add("recording");
+                if (voiceStatusBar) voiceStatusBar.classList.remove("hidden");
+                if (tabVoiceStatusBar) tabVoiceStatusBar.classList.remove("hidden");
             } else {
                 speechRecognition.stop();
             }
-        });
+        };
+
+        if (btnVoiceToggle) btnVoiceToggle.addEventListener("click", toggleRecording);
+        if (btnTabVoiceToggle) btnTabVoiceToggle.addEventListener("click", toggleRecording);
     }
 
     // =================================================================

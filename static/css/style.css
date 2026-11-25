@@ -1324,35 +1324,92 @@ body {
     100% { transform: scale(0.95); opacity: 0; }
 }
 
-/* Chatbot Drawer Panel */
+/* Floating Launcher Button - Hidden (Assistant moved to TOP) */
+.chatbot-launcher {
+    display: none !important;
+}
+
+/* Chatbot Drawer Panel - Positioned at TOP */
+.chat-drawer,
 .chatbot-drawer {
     position: fixed;
-    bottom: 100px;
-    right: 28px;
-    width: 430px;
+    top: 75px !important;
+    bottom: auto !important;
+    right: 28px !important;
+    width: 440px;
     max-width: calc(100vw - 36px);
-    height: 600px;
-    max-height: calc(100vh - 120px);
-    background: rgba(15, 23, 42, 0.94);
+    height: calc(100vh - 100px);
+    max-height: 640px;
+    background: rgba(15, 23, 42, 0.96);
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
-    border: 1px solid rgba(139, 92, 246, 0.35);
+    border: 1px solid rgba(139, 92, 246, 0.4);
     border-radius: 20px;
-    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7), 0 0 35px rgba(139, 92, 246, 0.25);
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.75), 0 0 35px rgba(139, 92, 246, 0.25);
     display: flex;
     flex-direction: column;
     z-index: 1000;
     overflow: hidden;
-    transform: translateY(25px) scale(0.94);
+    transform: translateY(-20px) scale(0.96);
     opacity: 0;
     pointer-events: none;
     transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.chatbot-drawer.active {
-    transform: translateY(0) scale(1);
-    opacity: 1;
-    pointer-events: auto;
+.chat-drawer:not(.hidden),
+.chatbot-drawer.active,
+.chat-drawer.active {
+    transform: translateY(0) scale(1) !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+}
+
+/* Assistant Full-Width Top Workspace Styles */
+.assistant-workspace-grid {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 24px;
+}
+
+.assistant-main-card {
+    display: flex;
+    flex-direction: column;
+}
+
+.compliance-guidelines-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 8px;
+}
+
+.guide-item {
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 16px;
+}
+
+.guide-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.guide-item p {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.5;
+}
+
+@media (max-width: 1024px) {
+    .assistant-workspace-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 /* Chat Header */
