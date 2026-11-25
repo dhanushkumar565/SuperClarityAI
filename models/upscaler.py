@@ -117,18 +117,21 @@ class SupplierClarityUpscaler:
         method: str = "realesrgan",
         denoise: bool = True,
         sharpen: bool = True,
-        sharpen_strength: float = 1.15
+        sharpen_strength: float = 1.15,
+        product_preset: dict = None
     ) -> dict:
         """
         Enhance a low-resolution vendor image using the specified Super-Resolution method.
+        Supports 2x, 4x, and 8x AI super-resolution with product-specific presets.
         
         Args:
             image_input: PIL Image, NumPy ndarray (RGB/BGR), or file path.
-            scale: Upscaling factor (2 or 4).
+            scale: Upscaling factor (2, 4, or 8).
             method: 'realesrgan', 'edsr', 'srcnn', 'bicubic', or 'bilinear'.
             denoise: Apply pre/post bilateral edge-preserving artifact smoothing.
             sharpen: Apply unsharp masking to enhance package text and edges.
             sharpen_strength: Multiplier for sharpening mask.
+            product_preset: Optional dictionary with product-specific tuning parameters.
             
         Returns:
             Dictionary with enhanced PIL image, resolution metadata, and latency.
@@ -149,6 +152,14 @@ class SupplierClarityUpscaler:
         else:
             raise ValueError("Unsupported image input type.")
 
+        # Preset overrides if provided
+        contrast_boost = 1.0
+        if product_preset and isinstance(product_preset, dict):
+            if "sharpen_strength" in product_preset:
+                sharpen_strength = float(product_preset["sharpen_strength"])
+            if "contrast_boost" in product_preset:
+                contrast_boost = float(product_preset["contrast_boost"])
+
         orig_w, orig_h = pil_img.size
         target_w, target_h = orig_w * scale, orig_h * scale
         
@@ -156,7 +167,8 @@ class SupplierClarityUpscaler:
         if denoise:
             np_img = np.array(pil_img)
             # Bilateral filter preserves sharp geometric product edges while smoothing JPEG macroblocks
-            np_img = cv2.bilateralFilter(np_img, d=5, sigmaColor=35, sigmaSpace=35)
+            sigma_val = 30 if (product_preset and product_preset.get("name") == "Apparel & Footwear") else 35
+            np_img = cv2.bilateralFilter(np_img, d=5, sigmaColor=sigma_val, sigmaSpace=sigma_val)
             pil_img = Image.fromarray(np_img)
 
         # 2. Execute selected Super-Resolution model
@@ -181,6 +193,10 @@ class SupplierClarityUpscaler:
         if sharpen and sharpen_strength > 0:
             enhanced_pil = self._apply_unsharp_mask(enhanced_pil, strength=sharpen_strength)
 
+        # Apply preset contrast boost if configured
+        if contrast_boost != 1.0:
+            enhanced_pil = ImageEnhance.Contrast(enhanced_pil).enhance(contrast_boost)
+
         # Ensure exact target dimensions
         if enhanced_pil.size != (target_w, target_h):
             enhanced_pil = enhanced_pil.resize((target_w, target_h), Image.LANCZOS)
@@ -202,6 +218,12 @@ class SupplierClarityUpscaler:
     # -----------------------------------------------------------------
     def _infer_realesrgan(self, img_pil: Image.Image, scale: int = 4) -> Image.Image:
         """Run Real-ESRGAN deep model inference with tile support."""
+        if scale == 8:
+            # 8x progressive cascaded super-resolution: 4x pass followed by 2x pass
+            inter_4x = self._infer_realesrgan(img_pil, scale=4)
+            out_8x = self._infer_realesrgan(inter_4x, scale=2)
+            return out_8x
+
         if scale == 2:
             model = self._load_realesrgan_2x()
             native_scale = 2
@@ -254,7 +276,11 @@ class SupplierClarityUpscaler:
 
     def _infer_edsr(self, img_pil: Image.Image, scale: int = 4) -> Image.Image:
         """Run EDSR residual model."""
-        model = self._load_edsr(scale=scale)
+        if scale == 8:
+            inter_4x = self._infer_edsr(img_pil, scale=4)
+            return inter_4x.resize((img_pil.width * 8, img_pil.height * 8), Image.LANCZOS)
+            
+        model = self._load_edsr(scale=scale if scale in [2, 4] else 4)
         img_np = np.array(img_pil).astype(np.float32) / 255.0
         tensor = torch.from_numpy(img_np.transpose((2, 0, 1))).unsqueeze(0).to(self.device)
         

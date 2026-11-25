@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SupplierClarity AI — Vendor Product Image Upscaler</title>
-    <!-- Google Fonts: Inter -->
+    <title>SuperClarity AI — Enterprise E-Commerce Image Upscaling & AI Studio Platform</title>
+    <!-- Google Fonts: Inter & JetBrains Mono -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
@@ -13,297 +13,786 @@
     <!-- Custom Stylesheet -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
-<body>
+<body class="dark-theme">
     <!-- Animated Glowing Background Blobs -->
     <div class="blob blob-1"></div>
     <div class="blob blob-2"></div>
     <div class="blob blob-3"></div>
 
     <div class="app-container">
-        <!-- Navigation / Header -->
+        <!-- Top Application Header -->
         <header class="app-header">
             <div class="brand">
                 <div class="brand-icon">
                     <i class="fa-solid fa-wand-magic-sparkles"></i>
                 </div>
                 <div class="brand-text">
-                    <h1>SupplierClarity <span class="badge-ai">AI</span></h1>
-                    <p class="tagline">Deep Learning-Powered Vendor Product Image Upscaler & Catalog Restoration</p>
+                    <h1>SuperClarity <span class="badge-ai">AI Pro</span></h1>
+                    <p class="tagline">Enterprise E-Commerce Image Super-Resolution & Product Enhancement Studio</p>
                 </div>
             </div>
+
+            <!-- Global Action Toolbar -->
             <div class="header-actions">
-                <button class="nav-btn primary" id="btn-header-assistant">
-                    <i class="fa-solid fa-headset"></i> AI Assistant
+                <button type="button" class="nav-btn-icon" id="btn-theme-toggle" title="Toggle Light/Dark Theme">
+                    <i class="fa-solid fa-moon"></i>
                 </button>
-                <button class="nav-btn" id="btn-benchmark-modal">
-                    <i class="fa-solid fa-chart-simple"></i> Benchmark Results
+                <button type="button" class="nav-btn" id="btn-benchmark-modal">
+                    <i class="fa-solid fa-chart-simple"></i> Benchmark
+                </button>
+                <button type="button" class="nav-btn primary" id="btn-header-assistant">
+                    <i class="fa-solid fa-headset"></i> AI Assistant
                 </button>
             </div>
         </header>
 
-        <!-- Main Workspace: Image Upload & Enhancement Controls -->
-        <main class="workspace-grid">
-            <div class="glass-card main-input-card">
+        <!-- Navigation Tab Bar -->
+        <nav class="workspace-tabs-nav">
+            <button type="button" class="tab-nav-btn active" data-tab="tab-upscaler">
+                <i class="fa-solid fa-maximize"></i> AI Upscaler (2× / 4× / 8×)
+            </button>
+            <button type="button" class="tab-nav-btn" data-tab="tab-studio">
+                <i class="fa-solid fa-wand-magic"></i> AI Studio Editor
+            </button>
+            <button type="button" class="tab-nav-btn" data-tab="tab-laboratory">
+                <i class="fa-solid fa-flask-vial"></i> Model Lab
+            </button>
+            <button type="button" class="tab-nav-btn" data-tab="tab-batch">
+                <i class="fa-solid fa-layer-group"></i> Batch Processing
+            </button>
+            <button type="button" class="tab-nav-btn" data-tab="tab-catalog">
+                <i class="fa-solid fa-box-archive"></i> Product Catalog & Search
+            </button>
+            <button type="button" class="tab-nav-btn" data-tab="tab-export">
+                <i class="fa-solid fa-share-nodes"></i> Export Center
+            </button>
+        </nav>
+
+        <!-- ================================================================= -->
+        <!-- TAB 1: AI UPSCALER WORKSPACE (Preserves all original functionality) -->
+        <!-- ================================================================= -->
+        <section class="tab-content active" id="tab-upscaler">
+            <main class="workspace-grid">
+                <!-- Left Column: Ingestion & Enhancement Controls -->
+                <div class="glass-card main-input-card">
+                    <div class="card-header">
+                        <div class="header-left">
+                            <i class="fa-solid fa-cloud-arrow-up card-icon"></i>
+                            <div>
+                                <h3>Product Image Ingestion</h3>
+                                <p class="card-subtitle">Upload supplier image or select a benchmark sample product</p>
+                            </div>
+                        </div>
+                        <div id="detected-category-badge" class="category-pill hidden">
+                            <i class="fa-solid fa-tag"></i> <span id="badge-category-text">Detected</span>
+                        </div>
+                    </div>
+
+                    <!-- Sample Products Quick Selection -->
+                    <div class="samples-container">
+                        <label class="input-label"><i class="fa-solid fa-cube"></i> Quick Demo Products (Click to Load):</label>
+                        <div class="sample-pills" id="sample-pills-list">
+                            <button type="button" class="sample-pill active" data-sample-id="luxury_watch">
+                                <i class="fa-solid fa-clock"></i> Luxury Watch
+                            </button>
+                            <button type="button" class="sample-pill" data-sample-id="sneaker_shoe">
+                                <i class="fa-solid fa-shoe-prints"></i> Running Sneaker
+                            </button>
+                            <button type="button" class="sample-pill" data-sample-id="cosmetic_serum">
+                                <i class="fa-solid fa-pump-soap"></i> Skincare Serum
+                            </button>
+                            <button type="button" class="sample-pill" data-sample-id="organic_coffee_pack">
+                                <i class="fa-solid fa-mug-hot"></i> Coffee & Barcode
+                            </button>
+                            <button type="button" class="sample-pill" data-sample-id="wireless_earbuds">
+                                <i class="fa-solid fa-headphones"></i> Wireless Earbuds
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- File Upload Zone -->
+                    <div class="upload-dropzone" id="drop-zone">
+                        <input type="file" id="file-input" accept="image/*, image/png, image/jpeg, image/jpg, image/webp" hidden>
+                        <div class="dropzone-content" id="dropzone-prompt">
+                            <div class="upload-icon-circle">
+                                <i class="fa-solid fa-arrow-up-from-bracket"></i>
+                            </div>
+                            <h4>Drag and drop vendor product image here</h4>
+                            <p>or <span class="browse-link" id="browse-link">browse files</span></p>
+
+                            <!-- Dedicated Gallery Upload Action -->
+                            <div class="gallery-upload-action">
+                                <button type="button" class="btn-gallery-upload" id="btn-gallery-upload">
+                                    <i class="fa-solid fa-images"></i> Choose from Gallery / Photos
+                                </button>
+                            </div>
+
+                            <div class="file-badges">
+                                <span class="file-badge">PNG</span>
+                                <span class="file-badge">JPG</span>
+                                <span class="file-badge">WEBP</span>
+                                <span class="file-badge"><i class="fa-solid fa-paste"></i> Paste (Ctrl+V)</span>
+                                <span class="file-badge">Max 32 MB</span>
+                            </div>
+                        </div>
+                        <!-- Uploaded Image Thumbnail Preview -->
+                        <div class="dropzone-preview hidden" id="dropzone-preview">
+                            <img id="preview-img" src="" alt="Vendor Input Preview">
+                            <div class="preview-overlay">
+                                <span id="preview-filename">product.jpg</span>
+                                <span id="preview-dims" class="meta-tag">128x128 px</span>
+                                <button type="button" class="btn-clear-img" id="btn-clear-upload" title="Clear Image">
+                                    <i class="fa-solid fa-xmark"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Diagnostic Quality Alert (Populated on upload) -->
+                    <div class="diagnostic-card hidden" id="diagnostic-card">
+                        <div class="diag-header">
+                            <div class="diag-title">
+                                <i class="fa-solid fa-stethoscope"></i> Image Health & Defect Diagnosis
+                            </div>
+                            <div class="diag-score" id="diag-score-badge">Quality: 85/100</div>
+                        </div>
+                        <div class="diag-metrics-row">
+                            <span class="diag-tag" id="diag-sharpness-tag"><i class="fa-solid fa-eye"></i> Sharpness: Good</span>
+                            <span class="diag-tag" id="diag-noise-tag"><i class="fa-solid fa-wave-square"></i> Noise: Low</span>
+                            <span class="diag-tag" id="diag-exposure-tag"><i class="fa-solid fa-sun"></i> Exposure: Balanced</span>
+                        </div>
+                        <p class="diag-recommendation" id="diag-rec-text"></p>
+                    </div>
+
+                    <!-- Enhancement Parameters & Toggles -->
+                    <form id="upscale-form" class="controls-form">
+                        <div class="controls-grid">
+                            <!-- Upscaling Factor (2x vs 4x vs 8x) -->
+                            <div class="control-group">
+                                <label class="input-label"><i class="fa-solid fa-maximize"></i> Upscaling Scale Factor:</label>
+                                <div class="toggle-group" id="scale-toggle-group">
+                                    <button type="button" class="toggle-btn" data-scale="2">
+                                        <span class="scale-num">2×</span>
+                                        <span class="scale-desc">High Definition</span>
+                                    </button>
+                                    <button type="button" class="toggle-btn active" data-scale="4">
+                                        <span class="scale-num">4×</span>
+                                        <span class="scale-desc">Ultra Catalog 4K</span>
+                                    </button>
+                                    <button type="button" class="toggle-btn" data-scale="8">
+                                        <span class="scale-num">8×</span>
+                                        <span class="scale-desc">Extreme 8K</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Neural Model Selection -->
+                            <div class="control-group">
+                                <label class="input-label" for="model-select"><i class="fa-solid fa-brain"></i> Neural Network Architecture:</label>
+                                <select id="model-select" class="form-select">
+                                    <option value="realesrgan" selected>Real-ESRGAN / SRVGGNetCompact (Recommended for E-Commerce)</option>
+                                    <option value="edsr">EDSR (Enhanced Deep Residual Networks)</option>
+                                    <option value="srcnn">SRCNN (Classic 3-Layer Deep CNN)</option>
+                                    <option value="bicubic">Bicubic Interpolation (Baseline Comparison)</option>
+                                </select>
+                            </div>
+
+                            <!-- Feature Enhancement Toggles -->
+                            <div class="control-group full-width">
+                                <label class="input-label"><i class="fa-solid fa-sliders"></i> Intelligent Enhancement Pipeline:</label>
+                                <div class="checkbox-row">
+                                    <label class="custom-checkbox">
+                                        <input type="checkbox" id="check-auto-preset" checked>
+                                        <span class="checkbox-mark"></span>
+                                        <span class="checkbox-text">
+                                            <strong>Product-Aware Auto-Tuning</strong>
+                                            <small>Adapts filter parameters to detected item category (jewelry, fabric, packaging)</small>
+                                        </span>
+                                    </label>
+
+                                    <label class="custom-checkbox">
+                                        <input type="checkbox" id="check-denoise" checked>
+                                        <span class="checkbox-mark"></span>
+                                        <span class="checkbox-text">
+                                            <strong>Bilateral Artifact Suppression</strong>
+                                            <small>Dissolves lossy JPEG macroblocking without blurring edges</small>
+                                        </span>
+                                    </label>
+
+                                    <label class="custom-checkbox">
+                                        <input type="checkbox" id="check-sharpen" checked>
+                                        <span class="checkbox-mark"></span>
+                                        <span class="checkbox-text">
+                                            <strong>Micro-Typography Unsharp Masking</strong>
+                                            <small>Crisps brand logos, barcode line pitch, and fine ingredient text</small>
+                                        </span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Submit Action Button -->
+                        <button type="submit" class="btn-enhance" id="btn-submit">
+                            <span class="btn-text"><i class="fa-solid fa-bolt"></i> Enhance Product Image</span>
+                            <span class="btn-loader hidden"><i class="fa-solid fa-spinner fa-spin"></i> Processing Neural Super-Resolution...</span>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Right Column: Results & Interactive Comparison Viewer -->
+                <div class="glass-card main-results-card">
+                    <div class="card-header">
+                        <div class="header-left">
+                            <i class="fa-solid fa-image card-icon"></i>
+                            <div>
+                                <h3>Enhanced Visual Results</h3>
+                                <p class="card-subtitle">Interactive split comparison and verified objective metrics</p>
+                            </div>
+                        </div>
+                        <div class="view-toggles" id="view-mode-toggles">
+                            <button type="button" class="view-btn active" id="btn-mode-slider" title="Split Slider Comparison">
+                                <i class="fa-solid fa-arrows-left-right"></i> Split Slider
+                            </button>
+                            <button type="button" class="view-btn" id="btn-mode-side" title="Side-by-Side View">
+                                <i class="fa-solid fa-table-columns"></i> Side-by-Side
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Comparison Container -->
+                    <div class="comparison-container" id="results-section">
+                        <!-- Interactive Split-Slider Viewer -->
+                        <div class="split-slider-wrapper" id="slider-wrapper">
+                            <!-- Before Image (Supplier Input) -->
+                            <img class="slider-img img-before" id="img-before" src="/static/samples/luxury_watch_supplier_input.jpg" alt="Low Resolution Input">
+                            
+                            <!-- After Image (Neural Enhanced Output) in clipped container -->
+                            <div class="slider-after-container" id="slider-after-container">
+                                <img class="slider-img img-after" id="img-after" src="/static/samples/luxury_watch_enhanced_4x.png" alt="High Resolution Output">
+                            </div>
+
+                            <!-- Central Draggable Split Handle -->
+                            <div class="slider-divider" id="slider-handle">
+                                <div class="divider-line"></div>
+                                <div class="divider-button">
+                                    <i class="fa-solid fa-chevron-left"></i>
+                                    <i class="fa-solid fa-chevron-right"></i>
+                                </div>
+                            </div>
+
+                            <!-- Overlay Resolution Badges -->
+                            <div class="slider-badge badge-before">
+                                <span>Supplier Input</span>
+                                <span class="badge-res" id="metric-res-before">128×128</span>
+                            </div>
+                            <div class="slider-badge badge-after">
+                                <span>AI Enhanced (4×)</span>
+                                <span class="badge-res" id="metric-res-after">512×512</span>
+                            </div>
+                        </div>
+
+                        <!-- Side-by-Side Viewer Mode (Hidden by default) -->
+                        <div class="side-by-side-wrapper hidden" id="side-wrapper">
+                            <div class="side-card">
+                                <div class="side-card-header">
+                                    <span class="label-muted"><i class="fa-solid fa-image"></i> Supplier Input</span>
+                                    <span id="side-orig-res" class="pill-dim">128×128 px</span>
+                                </div>
+                                <div class="side-img-box">
+                                    <img id="side-img-before" src="" alt="Supplier Input">
+                                </div>
+                            </div>
+                            <div class="side-card enhanced-card">
+                                <div class="side-card-header">
+                                    <span class="label-accent"><i class="fa-solid fa-sparkles"></i> AI Enhanced</span>
+                                    <span id="side-enh-res" class="pill-dim accent">512×512 px</span>
+                                </div>
+                                <div class="side-img-box">
+                                    <img id="side-img-after" src="" alt="AI Enhanced Output">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quantitative Metrics Grid -->
+                    <div class="metrics-grid">
+                        <div class="metric-card">
+                            <div class="metric-icon"><i class="fa-solid fa-expand"></i></div>
+                            <div class="metric-body">
+                                <span class="metric-label">Resolution Upscaling</span>
+                                <div class="metric-value" id="metric-resolution">128×128 → 512×512</div>
+                                <span class="metric-meta" id="metric-scale">4× Geometric Super-Resolution</span>
+                            </div>
+                        </div>
+
+                        <div class="metric-card">
+                            <div class="metric-icon"><i class="fa-solid fa-bolt"></i></div>
+                            <div class="metric-body">
+                                <span class="metric-label">Inference Latency</span>
+                                <div class="metric-value" id="metric-latency">245 ms</div>
+                                <span class="metric-meta" id="metric-fps">Sub-second Real-Time CPU</span>
+                            </div>
+                        </div>
+
+                        <div class="metric-card">
+                            <div class="metric-icon"><i class="fa-solid fa-eye"></i></div>
+                            <div class="metric-body">
+                                <span class="metric-label">Tenengrad Sharpness Boost</span>
+                                <div class="metric-value accent" id="metric-sharpness">+62.8×</div>
+                                <span class="metric-meta" id="metric-sharpness-vals">Laplacian Var: 8.7 → 546.5</span>
+                            </div>
+                        </div>
+
+                        <div class="metric-card" id="card-ground-truth">
+                            <div class="metric-icon"><i class="fa-solid fa-bullseye"></i></div>
+                            <div class="metric-body">
+                                <span class="metric-label">Objective Quality Verification</span>
+                                <div class="metric-value" id="metric-psnr-ssim">SSIM: 0.9206 | PSNR: 24.2 dB</div>
+                                <span class="metric-meta" id="metric-gt-status">Ground-truth verified against 2K catalog</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Advanced Tool Integration Bar -->
+                    <div class="tool-integration-bar">
+                        <button type="button" class="btn-subaction" id="btn-view-explainability">
+                            <i class="fa-solid fa-microscope"></i> Explainability Heatmap & ΔE
+                        </button>
+                        <button type="button" class="btn-subaction" id="btn-send-to-studio">
+                            <i class="fa-solid fa-palette"></i> Edit in AI Studio
+                        </button>
+                        <button type="button" class="btn-subaction" id="btn-save-to-catalog">
+                            <i class="fa-solid fa-bookmark"></i> Save to Catalog
+                        </button>
+                    </div>
+
+                    <!-- Action / Download Toolbar -->
+                    <div class="download-bar">
+                        <div class="download-info">
+                            <i class="fa-solid fa-download"></i>
+                            <div>
+                                <strong>Export Production Asset</strong>
+                                <p>Standard master formats ready for direct e-commerce catalog deployment</p>
+                            </div>
+                        </div>
+                        <div class="download-buttons">
+                            <a href="#" class="btn-download primary" id="btn-dl-png" download>
+                                <i class="fa-solid fa-file-image"></i> Download HD PNG
+                            </a>
+                            <a href="#" class="btn-download secondary" id="btn-dl-jpg" download>
+                                <i class="fa-solid fa-file"></i> Download Compressed JPEG
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </section>
+
+        <!-- ================================================================= -->
+        <!-- TAB 2: AI IMAGE EDITING STUDIO -->
+        <!-- ================================================================= -->
+        <section class="tab-content" id="tab-studio">
+            <div class="studio-layout">
+                <!-- Studio Canvas Workstation -->
+                <div class="glass-card studio-canvas-card">
+                    <div class="card-header">
+                        <div class="header-left">
+                            <i class="fa-solid fa-palette card-icon"></i>
+                            <div>
+                                <h3>Product Editing Canvas</h3>
+                                <p class="card-subtitle">Real-time background isolation, shadow synthesis, and adjustments</p>
+                            </div>
+                        </div>
+                        <div class="studio-quick-tools">
+                            <button type="button" class="tool-btn" id="btn-studio-zoom-in" title="Zoom In"><i class="fa-solid fa-magnifying-glass-plus"></i></button>
+                            <button type="button" class="tool-btn" id="btn-studio-zoom-out" title="Zoom Out"><i class="fa-solid fa-magnifying-glass-minus"></i></button>
+                            <button type="button" class="tool-btn" id="btn-studio-reset" title="Reset View"><i class="fa-solid fa-arrow-rotate-left"></i></button>
+                        </div>
+                    </div>
+
+                    <div class="studio-canvas-container" id="studio-canvas-box">
+                        <img id="studio-preview-img" src="/static/samples/luxury_watch_enhanced_4x.png" alt="Studio Preview">
+                    </div>
+
+                    <!-- Natural Language Voice / Text Editing Command Bar -->
+                    <div class="nl-command-box">
+                        <div class="nl-input-wrapper">
+                            <i class="fa-solid fa-wand-magic-sparkles nl-icon"></i>
+                            <input type="text" id="nl-command-input" placeholder="Natural Language Instruction, e.g. 'Make background white', 'Add soft drop shadow', 'Boost contrast'...">
+                            <button type="button" class="btn-nl-run" id="btn-studio-nl-run">
+                                <i class="fa-solid fa-paper-plane"></i> Apply Instruction
+                            </button>
+                        </div>
+                        <div class="nl-status-tag hidden" id="nl-status-tag"></div>
+                    </div>
+                </div>
+
+                <!-- Studio Controls Sidebar -->
+                <div class="glass-card studio-sidebar-card">
+                    <h3>Studio Actions</h3>
+
+                    <!-- Quick Segmentations -->
+                    <div class="studio-group">
+                        <label class="input-label"><i class="fa-solid fa-scissors"></i> Background & Matting:</label>
+                        <div class="btn-group-column">
+                            <button type="button" class="btn-studio-action primary-action" id="btn-studio-white">
+                                <i class="fa-solid fa-square"></i> Pure White Background (#FFFFFF)
+                            </button>
+                            <button type="button" class="btn-studio-action" id="btn-studio-transparent">
+                                <i class="fa-solid fa-border-none"></i> Transparent Cutout (PNG)
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Physics Lighting & Shadows -->
+                    <div class="studio-group">
+                        <label class="input-label"><i class="fa-solid fa-lightbulb"></i> Realistic Studio Physics:</label>
+                        <div class="btn-group-column">
+                            <button type="button" class="btn-studio-action" id="btn-studio-shadow">
+                                <i class="fa-solid fa-cloud-moon"></i> Add Contact Drop Shadow
+                            </button>
+                            <button type="button" class="btn-studio-action" id="btn-studio-reflection">
+                                <i class="fa-solid fa-water"></i> Add Specular Floor Reflection
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Aspect Ratio Cropping -->
+                    <div class="studio-group">
+                        <label class="input-label"><i class="fa-solid fa-crop-simple"></i> Marketplace Aspect Ratio Crop:</label>
+                        <div class="aspect-pills">
+                            <button type="button" class="aspect-pill" data-ratio="1:1">1:1 Square</button>
+                            <button type="button" class="aspect-pill" data-ratio="4:5">4:5 Portrait</button>
+                            <button type="button" class="aspect-pill" data-ratio="3:4">3:4 Catalog</button>
+                            <button type="button" class="aspect-pill" data-ratio="16:9">16:9 Wide</button>
+                        </div>
+                    </div>
+
+                    <!-- Color & Tone Sliders -->
+                    <div class="studio-group">
+                        <label class="input-label"><i class="fa-solid fa-sliders"></i> Tone & Clarity Controls:</label>
+                        <div class="slider-control">
+                            <div class="slider-label"><span>Brightness</span><span id="val-brightness">1.0</span></div>
+                            <input type="range" id="slider-brightness" min="0.5" max="1.5" step="0.05" value="1.0">
+                        </div>
+                        <div class="slider-control">
+                            <div class="slider-label"><span>Contrast</span><span id="val-contrast">1.0</span></div>
+                            <input type="range" id="slider-contrast" min="0.5" max="1.5" step="0.05" value="1.0">
+                        </div>
+                        <div class="slider-control">
+                            <div class="slider-label"><span>Saturation</span><span id="val-saturation">1.0</span></div>
+                            <input type="range" id="slider-saturation" min="0.0" max="2.0" step="0.05" value="1.0">
+                        </div>
+                        <div class="slider-control">
+                            <div class="slider-label"><span>Sharpness</span><span id="val-sharpness">1.0</span></div>
+                            <input type="range" id="slider-sharpness" min="0.0" max="2.5" step="0.05" value="1.0">
+                        </div>
+                        <button type="button" class="btn-apply-adjustments" id="btn-apply-sliders">
+                            <i class="fa-solid fa-check"></i> Apply Adjustments
+                        </button>
+                    </div>
+
+                    <!-- Download Studio Output -->
+                    <div class="studio-group">
+                        <a href="#" class="btn-download primary full-width" id="btn-studio-download" download="studio_enhanced.png">
+                            <i class="fa-solid fa-download"></i> Download Studio Asset
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================================================================= -->
+        <!-- TAB 3: MULTI-MODEL LABORATORY -->
+        <!-- ================================================================= -->
+        <section class="tab-content" id="tab-laboratory">
+            <div class="glass-card full-card">
                 <div class="card-header">
                     <div class="header-left">
-                        <i class="fa-solid fa-cloud-arrow-up card-icon"></i>
+                        <i class="fa-solid fa-flask-vial card-icon"></i>
                         <div>
-                            <h3>Product Image Ingestion</h3>
-                            <p class="card-subtitle">Upload a supplier image or select a benchmark sample product</p>
+                            <h3>Multi-Model Super-Resolution Laboratory</h3>
+                            <p class="card-subtitle">Execute parallel model inference across Real-ESRGAN, EDSR, SRCNN, and Bicubic on the exact same asset</p>
                         </div>
                     </div>
-                </div>
-
-                <!-- Sample Products Quick Selection -->
-                <div class="samples-container">
-                    <label class="input-label"><i class="fa-solid fa-cube"></i> Quick Demo Products (Click to Load):</label>
-                    <div class="sample-pills" id="sample-pills-list">
-                        <button type="button" class="sample-pill active" data-sample-id="luxury_watch">
-                            <i class="fa-solid fa-clock"></i> Luxury Watch
-                        </button>
-                        <button type="button" class="sample-pill" data-sample-id="sneaker_shoe">
-                            <i class="fa-solid fa-shoe-prints"></i> Running Sneaker
-                        </button>
-                        <button type="button" class="sample-pill" data-sample-id="cosmetic_serum">
-                            <i class="fa-solid fa-pump-soap"></i> Skincare Serum
-                        </button>
-                        <button type="button" class="sample-pill" data-sample-id="organic_coffee_pack">
-                            <i class="fa-solid fa-mug-hot"></i> Coffee & Barcode
-                        </button>
-                        <button type="button" class="sample-pill" data-sample-id="wireless_earbuds">
-                            <i class="fa-solid fa-headphones"></i> Wireless Earbuds
+                    <div class="lab-controls">
+                        <button type="button" class="btn-enhance-small" id="btn-run-model-comparison">
+                            <i class="fa-solid fa-play"></i> Run All 4 Models
                         </button>
                     </div>
                 </div>
 
-                <!-- File Upload Zone -->
-                <div class="upload-dropzone" id="drop-zone">
-                    <input type="file" id="file-input" accept="image/*, image/png, image/jpeg, image/jpg, image/webp" hidden>
-                    <div class="dropzone-content" id="dropzone-prompt">
-                        <div class="upload-icon-circle">
-                            <i class="fa-solid fa-arrow-up-from-bracket"></i>
+                <!-- 4-Card Comparison Grid -->
+                <div class="model-lab-grid" id="model-lab-grid">
+                    <div class="model-lab-card" data-model="realesrgan">
+                        <div class="lab-card-header">
+                            <span class="model-title">Real-ESRGAN (SRVGGNet)</span>
+                            <span class="rec-badge"><i class="fa-solid fa-star"></i> Recommended</span>
                         </div>
-                        <h4>Drag and drop vendor product image here</h4>
-                        <p>or <span class="browse-link" id="browse-link">browse files</span></p>
-
-                        <!-- Dedicated Gallery Upload Action -->
-                        <div class="gallery-upload-action">
-                            <button type="button" class="btn-gallery-upload" id="btn-gallery-upload">
-                                <i class="fa-solid fa-images"></i> Choose from Gallery / Photos
-                            </button>
+                        <div class="lab-img-box">
+                            <img id="lab-img-realesrgan" src="/static/samples/luxury_watch_enhanced_4x.png" alt="Real-ESRGAN Output">
                         </div>
-
-                        <div class="file-badges">
-                            <span class="file-badge">PNG</span>
-                            <span class="file-badge">JPG</span>
-                            <span class="file-badge">WEBP</span>
-                            <span class="file-badge"><i class="fa-solid fa-paste"></i> Paste (Ctrl+V)</span>
-                            <span class="file-badge">Max 16 MB</span>
+                        <div class="lab-metrics">
+                            <div class="lab-metric-item"><span>Sharpness:</span> <strong id="lab-sharp-realesrgan">546.5</strong></div>
+                            <div class="lab-metric-item"><span>Latency:</span> <strong id="lab-latency-realesrgan">251 ms</strong></div>
+                            <div class="lab-metric-item"><span>Artifacts:</span> <span class="tag-success">Zero</span></div>
                         </div>
                     </div>
-                    <!-- Uploaded Image Thumbnail Preview -->
-                    <div class="dropzone-preview hidden" id="dropzone-preview">
-                        <img id="preview-img" src="" alt="Vendor Input Preview">
-                        <div class="preview-overlay">
-                            <span id="preview-filename">product.jpg</span>
-                            <span id="preview-dims" class="meta-tag">128x128 px</span>
-                            <button type="button" class="btn-clear-img" id="btn-clear-upload" title="Clear Image">
-                                <i class="fa-solid fa-xmark"></i>
-                            </button>
+
+                    <div class="model-lab-card" data-model="edsr">
+                        <div class="lab-card-header">
+                            <span class="model-title">EDSR (Deep Residual)</span>
+                            <span class="tag-info">Residual Baseline</span>
+                        </div>
+                        <div class="lab-img-box">
+                            <img id="lab-img-edsr" src="/static/samples/luxury_watch_enhanced_4x.png" alt="EDSR Output">
+                        </div>
+                        <div class="lab-metrics">
+                            <div class="lab-metric-item"><span>Sharpness:</span> <strong id="lab-sharp-edsr">3,188</strong></div>
+                            <div class="lab-metric-item"><span>Latency:</span> <strong id="lab-latency-edsr">320 ms</strong></div>
+                            <div class="lab-metric-item"><span>Artifacts:</span> <span class="tag-info">Low</span></div>
+                        </div>
+                    </div>
+
+                    <div class="model-lab-card" data-model="srcnn">
+                        <div class="lab-card-header">
+                            <span class="model-title">SRCNN (Classic 3-Layer)</span>
+                            <span class="tag-warn">CNN Baseline</span>
+                        </div>
+                        <div class="lab-img-box">
+                            <img id="lab-img-srcnn" src="/static/samples/luxury_watch_enhanced_4x.png" alt="SRCNN Output">
+                        </div>
+                        <div class="lab-metrics">
+                            <div class="lab-metric-item"><span>Sharpness:</span> <strong id="lab-sharp-srcnn">79.8</strong></div>
+                            <div class="lab-metric-item"><span>Latency:</span> <strong id="lab-latency-srcnn">260 ms</strong></div>
+                            <div class="lab-metric-item"><span>Artifacts:</span> <span class="tag-warn">Soft Edges</span></div>
+                        </div>
+                    </div>
+
+                    <div class="model-lab-card" data-model="bicubic">
+                        <div class="lab-card-header">
+                            <span class="model-title">Bicubic Interpolation</span>
+                            <span class="tag-warn">No AI</span>
+                        </div>
+                        <div class="lab-img-box">
+                            <img id="lab-img-bicubic" src="/static/samples/luxury_watch_supplier_input.jpg" alt="Bicubic Output">
+                        </div>
+                        <div class="lab-metrics">
+                            <div class="lab-metric-item"><span>Sharpness:</span> <strong id="lab-sharp-bicubic">8.7</strong></div>
+                            <div class="lab-metric-item"><span>Latency:</span> <strong id="lab-latency-bicubic">2.9 ms</strong></div>
+                            <div class="lab-metric-item"><span>Artifacts:</span> <span class="tag-warn">High Blur</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================================================================= -->
+        <!-- TAB 4: BATCH PROCESSING QUEUE -->
+        <!-- ================================================================= -->
+        <section class="tab-content" id="tab-batch">
+            <div class="glass-card full-card">
+                <div class="card-header">
+                    <div class="header-left">
+                        <i class="fa-solid fa-layer-group card-icon"></i>
+                        <div>
+                            <h3>Bulk Catalog Batch Processor</h3>
+                            <p class="card-subtitle">Queue dozens of vendor photos for asynchronous super-resolution and download all as ZIP</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- Enhancement Parameters & Toggles -->
-                <form id="upscale-form" class="controls-form">
-                    <div class="controls-grid">
-                        <!-- Upscaling Factor (2x vs 4x) -->
-                        <div class="control-group">
-                            <label class="input-label"><i class="fa-solid fa-maximize"></i> Upscaling Scale Factor:</label>
-                            <div class="toggle-group" id="scale-toggle-group">
-                                <button type="button" class="toggle-btn" data-scale="2">
-                                    <span class="scale-num">2×</span>
-                                    <span class="scale-desc">High Definition</span>
-                                </button>
-                                <button type="button" class="toggle-btn active" data-scale="4">
-                                    <span class="scale-num">4×</span>
-                                    <span class="scale-desc">Ultra Catalog 4K</span>
-                                </button>
+                <!-- Batch Upload Zone -->
+                <div class="batch-upload-dropzone" id="batch-dropzone">
+                    <input type="file" id="batch-file-input" multiple accept="image/*" hidden>
+                    <div class="batch-prompt" id="batch-prompt">
+                        <i class="fa-solid fa-folder-open batch-icon"></i>
+                        <h4>Drag & drop multiple product photos here</h4>
+                        <p>or <button type="button" class="link-btn" id="btn-batch-browse">browse multiple files</button></p>
+                        <span class="file-badge">Bulk PNG / JPG / WEBP supported</span>
+                    </div>
+                </div>
+
+                <!-- Batch Parameters & Controls -->
+                <div class="batch-action-bar">
+                    <div class="batch-options">
+                        <label>Scale:
+                            <select id="batch-scale" class="form-select-sm">
+                                <option value="2">2×</option>
+                                <option value="4" selected>4×</option>
+                                <option value="8">8×</option>
+                            </select>
+                        </label>
+                        <label>Model:
+                            <select id="batch-model" class="form-select-sm">
+                                <option value="realesrgan" selected>Real-ESRGAN</option>
+                                <option value="edsr">EDSR</option>
+                            </select>
+                        </label>
+                    </div>
+                    <div class="batch-buttons">
+                        <button type="button" class="btn-enhance-small" id="btn-start-batch">
+                            <i class="fa-solid fa-play"></i> Start Batch Processing
+                        </button>
+                        <button type="button" class="btn-subaction hidden" id="btn-cancel-batch">
+                            <i class="fa-solid fa-ban"></i> Cancel Job
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Live Progress Card -->
+                <div class="batch-progress-card hidden" id="batch-progress-box">
+                    <div class="progress-status-row">
+                        <span id="batch-status-text">Processing Batch...</span>
+                        <span id="batch-counter-text">0 / 0 images</span>
+                    </div>
+                    <div class="progress-bar-track">
+                        <div class="progress-bar-fill" id="batch-progress-fill" style="width: 0%;"></div>
+                    </div>
+                    <div class="batch-zip-download hidden" id="batch-zip-box">
+                        <a href="#" class="btn-download primary" id="btn-download-batch-zip" download>
+                            <i class="fa-solid fa-file-zipper"></i> Download All Enhanced Images (ZIP)
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Batch Item List Table -->
+                <div class="table-responsive">
+                    <table class="batch-table" id="batch-items-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Filename</th>
+                                <th>Status</th>
+                                <th>Result</th>
+                            </tr>
+                        </thead>
+                        <tbody id="batch-table-body">
+                            <tr>
+                                <td colspan="4" class="text-center text-muted">No batch jobs queued. Upload images above to begin.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================================================================= -->
+        <!-- TAB 5: PRODUCT CATALOG & VISUAL SEARCH -->
+        <!-- ================================================================= -->
+        <section class="tab-content" id="tab-catalog">
+            <div class="glass-card full-card">
+                <div class="card-header">
+                    <div class="header-left">
+                        <i class="fa-solid fa-box-archive card-icon"></i>
+                        <div>
+                            <h3>Enterprise Product Catalog & Visual Similarity Search</h3>
+                            <p class="card-subtitle">Manage restored assets, filter by category or quality score, and detect near-duplicates</p>
+                        </div>
+                    </div>
+                    <div class="catalog-actions">
+                        <button type="button" class="btn-subaction" id="btn-open-visual-search">
+                            <i class="fa-solid fa-magnifying-glass"></i> Visual Image Search
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Catalog Filter Bar -->
+                <div class="catalog-filter-bar">
+                    <div class="search-input-wrapper">
+                        <i class="fa-solid fa-search"></i>
+                        <input type="text" id="catalog-search-input" placeholder="Search by title, category, or tags...">
+                    </div>
+                    <div class="category-pills-row" id="catalog-category-pills">
+                        <button type="button" class="cat-pill active" data-cat="All">All Categories</button>
+                        <button type="button" class="cat-pill" data-cat="Horology & Jewelry">Horology & Jewelry</button>
+                        <button type="button" class="cat-pill" data-cat="Apparel & Footwear">Apparel & Footwear</button>
+                        <button type="button" class="cat-pill" data-cat="Beauty & Cosmetics">Beauty & Cosmetics</button>
+                        <button type="button" class="cat-pill" data-cat="Packaged Goods & Pantry">Packaged Goods</button>
+                        <button type="button" class="cat-pill" data-cat="Consumer Electronics">Electronics</button>
+                    </div>
+                </div>
+
+                <!-- Catalog Cards Grid -->
+                <div class="catalog-grid" id="catalog-grid">
+                    <div class="empty-state" id="catalog-empty-state">
+                        <i class="fa-solid fa-box-open empty-icon"></i>
+                        <h4>Your product catalog is empty</h4>
+                        <p>Enhance images in the Upscaler and click "Save to Catalog" to build your library.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================================================================= -->
+        <!-- TAB 6: E-COMMERCE EXPORT CENTER -->
+        <!-- ================================================================= -->
+        <section class="tab-content" id="tab-export">
+            <div class="export-layout">
+                <!-- Left: Export Preview -->
+                <div class="glass-card export-preview-card">
+                    <div class="card-header">
+                        <div class="header-left">
+                            <i class="fa-solid fa-share-nodes card-icon"></i>
+                            <div>
+                                <h3>Marketplace Export Preview</h3>
+                                <p class="card-subtitle">Validated against platform resolution, aspect ratio, and white background rules</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="export-preview-box">
+                        <img id="export-preview-img" src="/static/samples/luxury_watch_enhanced_4x.png" alt="Export Preview">
+                    </div>
+                    <div class="export-meta-row">
+                        <span class="meta-tag" id="export-res-tag">2000×2000 px</span>
+                        <span class="meta-tag" id="export-fmt-tag">JPEG (Q92)</span>
+                        <span class="meta-tag" id="export-size-tag">~480 KB</span>
+                    </div>
+                </div>
+
+                <!-- Right: Marketplace Preset Selection -->
+                <div class="glass-card export-options-card">
+                    <h3>Select Marketplace Channel Preset</h3>
+                    <div class="preset-cards">
+                        <div class="preset-card active" data-preset="amazon">
+                            <div class="preset-icon"><i class="fa-brands fa-amazon"></i></div>
+                            <div class="preset-body">
+                                <strong>Amazon Storefront</strong>
+                                <p>2000×2000 px (1:1), Pure White Background (#FFFFFF), JPEG ≤ 10 MB with Hover-Zoom verification.</p>
                             </div>
                         </div>
 
-                        <!-- AI Model Architecture -->
-                        <div class="control-group">
-                            <label class="input-label"><i class="fa-solid fa-brain"></i> Super-Resolution Model:</label>
-                            <div class="model-select-wrapper">
-                                <select id="model-select" class="custom-select">
-                                    <option value="realesrgan" selected>SupplierClarity AI (Real-ESRGAN / SOTA)</option>
-                                    <option value="edsr">EDSR (Enhanced Deep Residual Networks)</option>
-                                    <option value="srcnn">SRCNN (Classic Super-Resolution CNN)</option>
-                                    <option value="bicubic">Bicubic Interpolation (Baseline)</option>
-                                </select>
-                                <i class="fa-solid fa-chevron-down select-arrow"></i>
+                        <div class="preset-card" data-preset="shopify">
+                            <div class="preset-icon"><i class="fa-brands fa-shopify"></i></div>
+                            <div class="preset-body">
+                                <strong>Shopify Catalog</strong>
+                                <p>2048×2048 px (1:1), WebP format, high-compression optimization for sub-second mobile page loads.</p>
+                            </div>
+                        </div>
+
+                        <div class="preset-card" data-preset="flipkart">
+                            <div class="preset-icon"><i class="fa-solid fa-bag-shopping"></i></div>
+                            <div class="preset-body">
+                                <strong>Flipkart Marketplace</strong>
+                                <p>1600×1600 px (1:1), JPEG (Q90), 80%+ product bounding box fill compliance.</p>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Restoration Filters -->
-                    <div class="filter-toggles">
-                        <label class="checkbox-container">
-                            <input type="checkbox" id="check-denoise" checked>
-                            <span class="checkmark"></span>
-                            <span class="checkbox-label">
-                                <strong>Vendor Compression Denoising</strong>
-                                <small>Bilateral edge-preserving filter eliminates JPEG blockiness</small>
-                            </span>
-                        </label>
-                        <label class="checkbox-container">
-                            <input type="checkbox" id="check-sharpen" checked>
-                            <span class="checkmark"></span>
-                            <span class="checkbox-label">
-                                <strong>High-Frequency Typography Sharpness</strong>
-                                <small>Sharpens micro-labels, barcode lines, and stitch contours</small>
-                            </span>
-                        </label>
+                    <!-- Compliance Checklist -->
+                    <div class="compliance-box">
+                        <label class="input-label"><i class="fa-solid fa-list-check"></i> Marketplace Compliance Verification:</label>
+                        <ul class="compliance-list">
+                            <li class="comp-item valid"><i class="fa-solid fa-check"></i> Resolution &gt;= 1000px (Hover Zoom Active)</li>
+                            <li class="comp-item valid"><i class="fa-solid fa-check"></i> 1:1 Aspect Ratio Letterbox Padding</li>
+                            <li class="comp-item valid"><i class="fa-solid fa-check"></i> RGB sRGB Color Space Preserved</li>
+                        </ul>
                     </div>
 
-                    <!-- Action Button -->
-                    <button type="submit" class="btn-enhance" id="btn-submit">
-                        <span class="btn-text">
-                            <i class="fa-solid fa-wand-magic-sparkles"></i> Enhance Product Image
-                        </span>
-                        <div class="btn-loader hidden">
-                            <div class="spinner"></div>
-                            <span>Processing Neural Super-Resolution...</span>
-                        </div>
+                    <!-- Generate & Download Export -->
+                    <button type="button" class="btn-enhance" id="btn-execute-export">
+                        <i class="fa-solid fa-download"></i> Generate & Download Marketplace Asset
                     </button>
-                </form>
-            </div>
-        </main>
-
-        <!-- Dynamic Results Section -->
-        <section class="results-section hidden" id="results-section">
-            <div class="results-header">
-                <div class="header-left">
-                    <span class="success-badge">
-                        <i class="fa-solid fa-circle-check"></i> Enhancement Complete
-                    </span>
-                    <h2>Restored E-Commerce Product Image</h2>
-                </div>
-                <div class="header-right">
-                    <div class="view-mode-toggle">
-                        <button type="button" class="mode-btn active" id="btn-mode-slider" title="Interactive Split Wipe Slider">
-                            <i class="fa-solid fa-arrows-left-right"></i> Comparison Slider
-                        </button>
-                        <button type="button" class="mode-btn" id="btn-mode-side" title="Side-by-Side Inspection">
-                            <i class="fa-solid fa-table-columns"></i> Side-by-Side
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Comparison Viewer Container -->
-            <div class="viewer-container">
-                <!-- Mode 1: Interactive Split-Slider Wipe -->
-                <div class="split-slider-wrapper" id="slider-wrapper">
-                    <div class="slider-image-before">
-                        <img id="img-before" src="" alt="Original Low-Res Image">
-                        <span class="slider-badge badge-left">
-                            <i class="fa-solid fa-triangle-exclamation"></i> ORIGINAL SUPPLIER (LR)
-                        </span>
-                    </div>
-                    <div class="slider-image-after" id="slider-after-container">
-                        <img id="img-after" src="" alt="Enhanced High-Res Image">
-                        <span class="slider-badge badge-right">
-                            <i class="fa-solid fa-sparkles"></i> RESTORED CATALOG READY (AI 4X)
-                        </span>
-                    </div>
-                    <div class="slider-handle" id="slider-handle">
-                        <div class="handle-line"></div>
-                        <div class="handle-circle">
-                            <i class="fa-solid fa-arrows-left-right"></i>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Mode 2: Side-by-Side View -->
-                <div class="side-by-side-wrapper hidden" id="side-wrapper">
-                    <div class="side-card">
-                        <div class="side-card-header">
-                            <span class="label-muted"><i class="fa-solid fa-image"></i> Supplier Input</span>
-                            <span id="side-orig-res" class="pill-dim">128×128 px</span>
-                        </div>
-                        <div class="side-img-box">
-                            <img id="side-img-before" src="" alt="Supplier Input">
-                        </div>
-                    </div>
-                    <div class="side-card enhanced-card">
-                        <div class="side-card-header">
-                            <span class="label-accent"><i class="fa-solid fa-sparkles"></i> AI Enhanced</span>
-                            <span id="side-enh-res" class="pill-dim accent">512×512 px</span>
-                        </div>
-                        <div class="side-img-box">
-                            <img id="side-img-after" src="" alt="AI Enhanced Output">
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Quantitative Metrics and Technical Details Grid -->
-            <div class="metrics-grid">
-                <div class="metric-card">
-                    <div class="metric-icon"><i class="fa-solid fa-expand"></i></div>
-                    <div class="metric-body">
-                        <span class="metric-label">Resolution Upscaling</span>
-                        <div class="metric-value" id="metric-resolution">128×128 → 512×512</div>
-                        <span class="metric-meta" id="metric-scale">4× Geometric Super-Resolution</span>
-                    </div>
-                </div>
-
-                <div class="metric-card">
-                    <div class="metric-icon"><i class="fa-solid fa-bolt"></i></div>
-                    <div class="metric-body">
-                        <span class="metric-label">Inference Latency</span>
-                        <div class="metric-value" id="metric-latency">245 ms</div>
-                        <span class="metric-meta" id="metric-fps">Sub-second Real-Time CPU</span>
-                    </div>
-                </div>
-
-                <div class="metric-card">
-                    <div class="metric-icon"><i class="fa-solid fa-eye"></i></div>
-                    <div class="metric-body">
-                        <span class="metric-label">Tenengrad Sharpness Boost</span>
-                        <div class="metric-value accent" id="metric-sharpness">+62.8×</div>
-                        <span class="metric-meta" id="metric-sharpness-vals">Laplacian Var: 8.7 → 546.5</span>
-                    </div>
-                </div>
-
-                <div class="metric-card" id="card-ground-truth">
-                    <div class="metric-icon"><i class="fa-solid fa-bullseye"></i></div>
-                    <div class="metric-body">
-                        <span class="metric-label">Objective Quality Verification</span>
-                        <div class="metric-value" id="metric-psnr-ssim">SSIM: 0.9206 | PSNR: 24.2 dB</div>
-                        <span class="metric-meta" id="metric-gt-status">Ground-truth verified against 2K catalog</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Action / Download Toolbar -->
-            <div class="download-bar">
-                <div class="download-info">
-                    <i class="fa-solid fa-download"></i>
-                    <div>
-                        <strong>Export High-Resolution Asset</strong>
-                        <p>Production-ready format suitable for Shopify, Amazon, and Magento catalogs</p>
-                    </div>
-                </div>
-                <div class="download-buttons">
-                    <a href="#" class="btn-download primary" id="btn-dl-png" download>
-                        <i class="fa-solid fa-file-image"></i> Download HD PNG
-                    </a>
-                    <a href="#" class="btn-download secondary" id="btn-dl-jpg" download>
-                        <i class="fa-solid fa-file"></i> Download Compressed JPEG
-                    </a>
                 </div>
             </div>
         </section>
@@ -311,13 +800,67 @@
         <!-- Footer -->
         <footer class="app-footer">
             <div class="footer-content">
-                <p><strong>SupplierClarity AI</strong> — Vendor Product Image Upscaler & Quality Restoration</p>
-                <p class="footer-sub">Domain: E-Commerce & Retail | PyTorch · Real-ESRGAN · EDSR · SRCNN · Flask</p>
+                <p><strong>SuperClarity AI Enterprise</strong> — Production-Grade Product Image Upscaler & AI Studio</p>
+                <p class="footer-sub">Domain: E-Commerce & Retail | PyTorch · Real-ESRGAN · EDSR · SRCNN · Flask · SQLite</p>
             </div>
         </footer>
     </div>
 
-    <!-- Benchmark Results Modal -->
+    <!-- ================================================================= -->
+    <!-- MODAL 1: EXPLAINABILITY & HALLUCINATION HEATMAP -->
+    <!-- ================================================================= -->
+    <div class="modal-backdrop hidden" id="explainability-modal">
+        <div class="modal-card modal-lg">
+            <div class="modal-header">
+                <div class="header-left">
+                    <i class="fa-solid fa-microscope modal-icon"></i>
+                    <div>
+                        <h3>AI Reconstruction Explainability & Reliability</h3>
+                        <p>High-frequency modification heatmap, CIE-Lab ΔE color deviation, and hallucination guard</p>
+                    </div>
+                </div>
+                <button type="button" class="btn-close-modal" id="btn-close-explain-modal"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="explain-grid">
+                    <div class="explain-img-box">
+                        <h4>Reconstruction Heatmap (Turbo Colormap)</h4>
+                        <img id="explain-heatmap-img" src="" alt="Modification Heatmap">
+                        <p class="img-caption">Warm colors (red/yellow) indicate synthesized micro-textures and sharp edge contours; cool colors (blue/purple) indicate preserved regions.</p>
+                    </div>
+                    <div class="explain-metrics-column">
+                        <div class="explain-metric-item">
+                            <span>Color Deviation (CIE-Lab ΔE):</span>
+                            <strong id="explain-delta-e">1.45 (ΔE &lt; 2.5)</strong>
+                            <small class="tag-success" id="explain-color-rating">Strict Brand Color Preservation</small>
+                        </div>
+                        <div class="explain-metric-item">
+                            <span>Reconstructed Region Density:</span>
+                            <strong id="explain-density">24.8% of pixels</strong>
+                        </div>
+                        <div class="explain-metric-item">
+                            <span>Hallucination Risk Level:</span>
+                            <strong id="explain-hallucination-risk">Low (Deterministic Regression)</strong>
+                        </div>
+                        <div class="explain-metric-item">
+                            <span>Model Confidence Score:</span>
+                            <strong id="explain-confidence">96%</strong>
+                        </div>
+                        <div class="modal-notice">
+                            <i class="fa-solid fa-shield-halved"></i>
+                            <div id="explain-warning-text">
+                                Input resolution is sufficient for deterministic feature super-resolution. Authentic packaging logos and product geometry are strictly preserved without synthetic generative inpainting.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- MODAL 2: BENCHMARK RESULTS MODAL (Preserved without Latency Column) -->
+    <!-- ================================================================= -->
     <div class="modal-backdrop hidden" id="benchmark-modal">
         <div class="modal-card">
             <div class="modal-header">
@@ -328,9 +871,7 @@
                         <p>Actual quantitative results evaluated across 5 e-commerce product categories (Scale 4×)</p>
                     </div>
                 </div>
-                <button type="button" class="btn-close-modal" id="btn-close-modal">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
+                <button type="button" class="btn-close-modal" id="btn-close-modal"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <div class="modal-body">
                 <div class="table-responsive">
@@ -374,7 +915,7 @@
                                 <td><span class="tag-info">Deep Residual Architecture</span></td>
                             </tr>
                             <tr class="row-highlight">
-                                <td><strong>SupplierClarity AI (Proposed)</strong></td>
+                                <td><strong>SuperClarity AI (Proposed)</strong></td>
                                 <td><strong>24.22 dB</strong></td>
                                 <td><strong>0.9206</strong></td>
                                 <td><strong>546.5</strong></td>
@@ -388,106 +929,91 @@
                     <i class="fa-solid fa-circle-info"></i>
                     <div>
                         <strong>The Perception-Distortion Tradeoff (Blau & Michaeli, CVPR 2018):</strong>
-                        Bicubic interpolation scores slightly higher in PSNR because pixel averaging minimizes mean squared error, but produces blurred product images. SupplierClarity AI reconstructs authentic high-frequency details, yielding a <strong>62× sharpness boost</strong> and superior structural similarity (SSIM: 0.9206).
+                        Bicubic interpolation scores slightly higher in PSNR because pixel averaging minimizes mean squared error, but produces blurred product images. SuperClarity AI reconstructs authentic high-frequency details, yielding a <strong>62× sharpness boost</strong> and superior structural similarity (SSIM: 0.9206).
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Floating Intelligent Chatbot Launcher Button -->
-    <div class="chatbot-launcher" id="chatbot-launcher" title="Open Multilingual AI Assistant (Voice & Text)">
-        <div class="chatbot-pulse"></div>
-        <i class="fa-solid fa-headset launcher-icon"></i>
-        <span class="launcher-badge">AI</span>
-    </div>
-
-    <!-- Multilingual Voice-Enabled Intelligent Chatbot Panel -->
-    <div class="chatbot-drawer" id="chatbot-drawer">
-        <div class="chat-header">
-            <div class="chat-header-info">
-                <div class="assistant-avatar">
-                    <i class="fa-solid fa-robot"></i>
-                    <span class="online-indicator"></span>
-                </div>
+    <!-- ================================================================= -->
+    <!-- SLIDE-OUT MULTILINGUAL VOICE/TEXT ASSISTANT DRAWER -->
+    <!-- ================================================================= -->
+    <div class="chat-drawer-backdrop hidden" id="chat-backdrop"></div>
+    <aside class="chat-drawer hidden" id="chat-drawer">
+        <div class="drawer-header">
+            <div class="drawer-title">
+                <div class="agent-avatar"><i class="fa-solid fa-robot"></i></div>
                 <div>
-                    <h4>SupplierClarity Assistant</h4>
-                    <p class="chat-status">Multilingual Voice & Text AI</p>
+                    <h4>SuperClarity Assistant</h4>
+                    <span class="agent-status"><span class="status-dot"></span> Online · Multilingual Vision AI</span>
                 </div>
             </div>
-            <div class="chat-header-actions">
-                <!-- Language Selector Dropdown -->
-                <div class="lang-selector-wrapper">
-                    <select id="chat-lang-select" class="chat-lang-select" title="Choose language">
-                        <option value="en" selected>🇬🇧 English</option>
-                        <option value="te">🇮🇳 తెలుగు</option>
-                        <option value="hi">🇮🇳 हिंदी</option>
-                    </select>
-                </div>
-                <button class="chat-btn-icon" id="chat-btn-minimize" title="Minimize Chat">
-                    <i class="fa-solid fa-chevron-down"></i>
-                </button>
+            <div class="drawer-header-actions">
+                <select id="chat-lang-select" class="lang-select">
+                    <option value="auto">🌐 Auto Detect</option>
+                    <option value="en">🇬🇧 English</option>
+                    <option value="te">🇮🇳 తెలుగు</option>
+                    <option value="hi">🇮🇳 हिंदी</option>
+                </select>
+                <button type="button" class="btn-close-drawer" id="btn-close-drawer"><i class="fa-solid fa-xmark"></i></button>
             </div>
         </div>
 
-        <!-- Active ML Context Pill -->
-        <div class="chat-context-banner" id="chat-context-banner" style="display: none;">
+        <!-- Telemetry Synchronizer Ribbon -->
+        <div class="telemetry-ribbon" id="telemetry-ribbon">
             <i class="fa-solid fa-link"></i>
-            <span id="chat-context-summary">Active image: Ready for explanation</span>
-            <button type="button" class="btn-explain-active" id="btn-explain-active">
-                <i class="fa-solid fa-wand-magic-sparkles"></i> Explain Result
+            <span id="telemetry-ribbon-text">Synchronized with Active Image Session</span>
+        </div>
+
+        <!-- Quick Question Prompts -->
+        <div class="chat-chips-scroll">
+            <button type="button" class="chat-chip" data-query="Is this image catalog ready for Amazon?">
+                <i class="fa-brands fa-amazon"></i> Amazon Ready?
+            </button>
+            <button type="button" class="chat-chip" data-query="Explain the SSIM and sharpness scores for this image">
+                <i class="fa-solid fa-chart-line"></i> Explain Metrics
+            </button>
+            <button type="button" class="chat-chip" data-query="What export settings should I use for Shopify?">
+                <i class="fa-brands fa-shopify"></i> Shopify Settings
+            </button>
+            <button type="button" class="chat-chip" data-query="ఈ చిత్రం నాణ్యత అమెజాన్ ప్రమాణాలకు సరిపోతుందా?">
+                🇮🇳 తెలుగులో విశ్లేషించండి
             </button>
         </div>
 
-        <!-- Message Thread Container -->
+        <!-- Messages Container -->
         <div class="chat-messages" id="chat-messages">
-            <!-- Initial Welcome Message -->
-            <div class="chat-msg assistant-msg">
-                <div class="msg-avatar"><i class="fa-solid fa-robot"></i></div>
-                <div class="msg-bubble">
-                    <p><strong>Hello! 👋 I am your SupplierClarity AI Assistant.</strong></p>
-                    <p>I can help you upscale vendor images, explain telemetry (SSIM, PSNR, Tenengrad sharpness), verify Amazon/Shopify catalog compliance, and troubleshoot blur or compression.</p>
-                    <p class="msg-sub">Feel free to type or tap the microphone to speak in <strong>English</strong>, <strong>తెలుగు</strong>, or <strong>हिंदी</strong>!</p>
-                    <button type="button" class="btn-speech-play" data-speech="Hello! I am your SupplierClarity AI Assistant. I can help you upscale vendor images, explain telemetry, and verify catalog compliance in English, Telugu, or Hindi.">
-                        <i class="fa-solid fa-volume-high"></i> Listen
-                    </button>
+            <div class="chat-bubble bot-bubble">
+                <div class="bubble-header">
+                    <span class="sender-name">SuperClarity AI</span>
+                    <span class="bubble-lang">English</span>
+                </div>
+                <div class="bubble-body">
+                    Hello! I am your retail catalog AI assistant. I can inspect image quality scores, explain super-resolution telemetry, provide marketplace export advice, or troubleshoot low-resolution vendor assets. Feel free to type or speak in English, తెలుగు, or हिंदी.
                 </div>
             </div>
         </div>
 
-        <!-- Quick Prompt Chips -->
-        <div class="chat-quick-prompts" id="chat-quick-prompts">
-            <button class="prompt-chip" data-query="Explain current upscaled result">
-                <i class="fa-solid fa-chart-line"></i> Explain Result
-            </button>
-            <button class="prompt-chip" data-query="What are Amazon catalog standards?">
-                <i class="fa-solid fa-store"></i> Amazon Standards
-            </button>
-            <button class="prompt-chip" data-query="How does Real-ESRGAN work?">
-                <i class="fa-solid fa-brain"></i> Real-ESRGAN Info
-            </button>
-            <button class="prompt-chip" data-query="Why is my product image blurry?">
-                <i class="fa-solid fa-triangle-exclamation"></i> Fix Image Blur
-            </button>
+        <!-- Voice Status -->
+        <div class="voice-status-bar hidden" id="voice-status-bar">
+            <div class="recording-pulse"></div>
+            <span id="voice-status-text">Listening to voice input...</span>
         </div>
 
-        <!-- Chat Input Controls with Voice STT & Text -->
+        <!-- Chat Input Footer -->
         <div class="chat-input-bar">
-            <button type="button" class="btn-voice-record" id="btn-voice-record" title="Speak through microphone (Speech-to-Text)">
+            <button type="button" class="btn-voice-record" id="btn-voice-toggle" title="Voice Input (STT)">
                 <i class="fa-solid fa-microphone"></i>
             </button>
-            <input type="text" id="chat-text-input" placeholder="Ask a question or speak..." autocomplete="off">
-            <button type="button" class="btn-chat-send" id="btn-chat-send" title="Send message">
+            <input type="text" id="chat-text-input" placeholder="Ask about quality, Amazon rules, or speak in any language...">
+            <button type="button" class="btn-chat-send" id="btn-chat-send" title="Send Query">
                 <i class="fa-solid fa-paper-plane"></i>
             </button>
         </div>
-        <div class="voice-status-bar" id="voice-status-bar" style="display: none;">
-            <span class="recording-pulse"></span>
-            <span id="voice-status-text">Listening in English... Speak now</span>
-        </div>
-    </div>
+    </aside>
 
-    <!-- Main JavaScript Application Logic -->
+    <!-- Main Controller Script -->
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 </body>
 </html>

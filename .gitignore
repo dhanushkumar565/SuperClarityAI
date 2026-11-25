@@ -29,6 +29,11 @@ static/uploads/*
 static/outputs/*
 !static/outputs/.gitkeep
 
+# Database & Runtime Data
+data/*.db
+*.db
+*.sqlite3
+
 # Model weights (fetched dynamically or stored via release assets)
 models/weights/*.pth
 !models/weights/.gitkeep

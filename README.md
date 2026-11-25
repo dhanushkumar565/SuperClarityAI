@@ -1,21 +1,23 @@
-# SupplierClarity AI: Vendor Product Image Upscaler
+# SuperClarity AI: Enterprise E-Commerce Image Upscaling & AI Studio Platform
 
 [![Python 3.11](https://img.shields.io/badge/Python-3.11%2B-blue.svg)](https://www.python.org/)
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.0%2B-EE4C2C.svg)](https://pytorch.org/)
 [![Flask](https://img.shields.io/badge/Flask-3.0%2B-000000.svg)](https://flask.palletsprojects.com/)
-[![Super-Resolution](https://img.shields.io/badge/Model-Real--ESRGAN%20%7C%20EDSR%20%7C%20SRCNN-8B5CF6.svg)]()
+[![Super-Resolution](https://img.shields.io/badge/Model-Real--ESRGAN%20%7C%20EDSR%20%7C%20SRCNN%20%7C%208x-8B5CF6.svg)]()
+[![Status](https://img.shields.io/badge/Tests-21%2F21%20Passing-brightgreen.svg)]()
 [![License](https://img.shields.io/badge/License-Apache%202.0-green.svg)]()
 
-> **Domain:** E-Commerce & Retail Image Quality Enhancement  
-> **Problem Statement:** Retailers frequently receive low-resolution, blurry, or low-quality product images from vendors and suppliers. These images fail to meet the display standards required for e-commerce catalogs. Requesting new photography from vendors is expensive, introduces supply chain delays, and hurts conversion rates.  
-> **Solution:** **SupplierClarity AI** is an AI-powered image restoration and super-resolution system that transforms low-resolution supplier images into crisp, high-resolution, catalog-ready assets (2× and 4×) while strictly preserving product geometry, authentic branding, and color profiles.
+> **Live Application URL (Cloudflare Public Tunnel):** [https://various-conclude-church-jobs.trycloudflare.com](https://various-conclude-church-jobs.trycloudflare.com)  
+> **Local Server URL:** [http://127.0.0.1:5050](http://127.0.0.1:5050)  
+> **Technical Architecture & Dataset Report:** [REPORT.md](file:///c:/Users/yarra/Downloads/genai(2)/REPORT.md)  
+> **Target Repository:** [https://github.com/dhanushkumar565/SuperClarityAI](https://github.com/dhanushkumar565/SuperClarityAI)
 
 ---
 
 ## Table of Contents
 
 1. [Key Features](#key-features)
-2. [Project Architecture](#project-architecture)
+2. [Workspaces & Modules](#workspaces--modules)
 3. [Project Directory Layout](#project-directory-layout)
 4. [Installation & Setup](#installation--setup)
 5. [How to Run the Application](#how-to-run-the-application)
@@ -30,24 +32,16 @@
 
 ## 1. Key Features
 
-- **Multi-Factor Neural Super-Resolution:** 2× and 4× geometric upscaling powered by deep convolutional and residual neural networks (Real-ESRGAN / SRVGGNetCompact, EDSR, SRCNN).
-- **Realistic Supply Chain Artifact Denoising:** Bilateral filtering suppresses JPEG blocking artifacts ($Q < 40$) and sensor noise without blurring structural edges.
-- **Micro-Typography & Edge Restoration:** High-frequency unsharp mask convolution restores fine packaging text (e.g. "30 ml / 1.0 fl.oz"), barcode line pitch, and fabric weave contours.
-- **Zero Hallucination Guarantee:** The model does not invent synthetic brand logos or alter physical product geometry.
-- **Sub-Second CPU Execution:** Optimized tile inference executes in **~250 ms** on standard CPU hardware without GPU requirements.
-- **Glassmorphism Web Interface:** Single-page responsive interface featuring:
-  - Interactive split-slider comparison viewer (draggable divider).
-  - Side-by-side inspection mode.
-  - Quick-select gallery of pre-loaded e-commerce products (luxury watch, running sneaker, skincare serum, artisan coffee, wireless earbuds).
-  - Real-time technical telemetry (Resolution before/after, processing latency, Tenengrad sharpness boost, and ground-truth PSNR/SSIM).
-  - High-resolution asset export (HD PNG and compressed JPEG).
-- **Multilingual Voice-Enabled Intelligent Assistant:**
-  - Natural language voice (STT) and text interaction supporting **English**, **Telugu (తెలుగు)**, and **Hindi (हिंदी)**.
-  - Text-to-speech audio playback (TTS) with language-matched voices.
-  - Live ML telemetry synchronization (explains active image SSIM, scale, latency, and catalog readiness).
-  - Domain-grounded verified retail knowledge base (Amazon, Shopify, Walmart standards).
-  - Instant script-based language identification (100% accuracy) and sub-millisecond CPU latency (0.48 ms).
-- **Public Tunnel Deployment:** Native support for public cloud exposure via `pyngrok` (`run_public.py`) and Cloudflare Tunnel.
+- **Progressive Neural Super-Resolution (2×, 4×, and 8×):** Cascaded progressive super-resolution achieving up to 8K e-commerce fidelity using Real-ESRGAN (`realesr-general-x4v3`), EDSR, and SRCNN.
+- **Product-Aware Quality Diagnostics:** Automatic classification into 6 retail categories (Horology & Jewelry, Apparel & Footwear, Cosmetics, Packaged Goods, Electronics, Furniture) with blind Laplacian blur scoring, high-pass noise detection, and exposure checks.
+- **AI Image Editing Studio:** Pure white background isolation (`#FFFFFF`), transparent PNG cutouts, physics-based contact drop shadows, specular floor reflections, aspect ratio cropping (1:1, 4:5, 3:4, 16:9), and natural-language voice/text editing commands.
+- **Multi-Model Laboratory:** Side-by-side comparative execution of Real-ESRGAN, EDSR, SRCNN, and Bicubic interpolation on the identical input asset with comparative sharpness and latency telemetry.
+- **AI Explainability & Reliability Engine:** High-frequency Turbo colormap heatmaps, CIE-$L^*a^*b^*$ $\Delta E^*$ Euclidean color deviation, and Shannon entropy hallucination risk estimation.
+- **Asynchronous Batch Processor:** Multi-file drag-and-drop ingestion, background multi-threading, live progress polling, job cancellation, and one-click ZIP archive export.
+- **Enterprise SQLite Catalog & Vector Search:** MobileNetV3 deep embedding visual vector search, 64-bit dHash perceptual duplicate discovery, category filters, and image version history.
+- **E-Commerce Export Center:** Built-in compliance validation and automated export formatting for Amazon ($2000\times2000$ 1:1, JPEG, white BG), Shopify ($2048\times2048$, WebP), and Flipkart ($1600\times1600$).
+- **Multilingual Retail Assistant:** Real-time conversational assistant in **English**, **Telugu (తెలుగు)**, and **Hindi (हिंदी)** with TTS/STT and live ML telemetry synchronization.
+- **Interactive Cursor FX:** Integrated smooth mousemove interactive particle motion animation.
 
 ---
 

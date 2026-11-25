@@ -20,8 +20,8 @@ class SupplierClarityTestSuite(unittest.TestCase):
         response = self.client.get("/")
         self.assertEqual(response.status_code, 200)
         html = response.data.decode("utf-8")
-        self.assertIn("SupplierClarity", html)
-        self.assertIn("Vendor Product Image Upscaler", html)
+        self.assertIn("SuperClarity", html)
+        self.assertIn("Enterprise E-Commerce Image Super-Resolution", html)
         self.assertIn("split-slider-wrapper", html)
         print("[TEST PASSED] Home page renders cleanly with 200 OK.")
 
@@ -222,6 +222,139 @@ class SupplierClarityTestSuite(unittest.TestCase):
         self.assertFalse(data["success"])
         self.assertIn("error", data)
         print("[TEST PASSED] Chatbot rejected empty message with HTTP 400.")
+
+    def test_15_product_analyzer_api(self):
+        """Verify /api/analyze extracts category, quality score, and recommendations."""
+        res = self.client.post("/api/analyze", data={"sample_id": "luxury_watch"})
+        self.assertEqual(res.status_code, 200)
+        data = json.loads(res.data.decode("utf-8"))
+        self.assertTrue(data["success"])
+        self.assertIn("category", data["analysis"])
+        self.assertIn("overall_score", data["analysis"])
+        self.assertIn("recommended_settings", data["analysis"])
+        print(f"[TEST PASSED] Product Analyzer: Category={data['analysis']['category']}, Score={data['analysis']['overall_score']}/100.")
+
+    def test_16_upscale_8x(self):
+        """Verify progressive 8x super-resolution on sample product."""
+        res = self.client.post("/api/upscale", data={
+            "sample_id": "luxury_watch",
+            "scale": 8,
+            "method": "realesrgan"
+        })
+        self.assertEqual(res.status_code, 200)
+        data = json.loads(res.data.decode("utf-8"))
+        self.assertTrue(data["success"])
+        self.assertEqual(data["scale"], 8)
+        self.assertEqual(data["enhanced_resolution"], "1024x1024")
+        print(f"[TEST PASSED] 8x Super-Resolution: 128x128 -> 1024x1024 in {data['latency_ms']}ms.")
+
+    def test_17_explainability_api(self):
+        """Verify /api/explainability computes heatmap, delta E, and hallucination risk."""
+        # Upscale first
+        up_res = self.client.post("/api/upscale", data={"sample_id": "luxury_watch", "scale": 4})
+        up_data = json.loads(up_res.data.decode("utf-8"))
+        
+        # Request explainability
+        exp_res = self.client.post("/api/explainability", json={
+            "original_path": up_data["original_image_path"],
+            "enhanced_path": up_data["enhanced_image_path"]
+        })
+        self.assertEqual(exp_res.status_code, 200)
+        exp_data = json.loads(exp_res.data.decode("utf-8"))
+        self.assertTrue(exp_data["success"])
+        self.assertIn("reconstruction_heatmap", exp_data)
+        self.assertIn("metrics", exp_data)
+        self.assertIn("delta_e_color_deviation", exp_data["metrics"])
+        self.assertIn("hallucination_risk", exp_data["metrics"])
+        print(f"[TEST PASSED] Explainability Engine verified: Confidence={exp_data['metrics']['confidence_pct']}%, Risk={exp_data['metrics']['hallucination_risk']}.")
+
+    def test_18_models_compare_api(self):
+        """Verify /api/models/compare generates side-by-side Real-ESRGAN, EDSR, SRCNN, Bicubic."""
+        res = self.client.post("/api/models/compare", data={"sample_id": "sneaker_shoe", "scale": 2})
+        self.assertEqual(res.status_code, 200)
+        data = json.loads(res.data.decode("utf-8"))
+        self.assertTrue(data["success"])
+        self.assertIn("realesrgan", data["results"])
+        self.assertIn("edsr", data["results"])
+        self.assertIn("srcnn", data["results"])
+        self.assertIn("bicubic", data["results"])
+        print(f"[TEST PASSED] Model Laboratory compared 4 architectures successfully.")
+
+    def test_19_studio_editing_apis(self):
+        """Verify AI Studio adjustments, white background replacement, and shadows."""
+        # 1. Adjustments
+        adj_res = self.client.post("/api/studio/adjust", json={
+            "sample_id": "luxury_watch",
+            "brightness": 1.1,
+            "contrast": 1.15,
+            "saturation": 1.05,
+            "sharpness": 1.2
+        })
+        self.assertEqual(adj_res.status_code, 200)
+        adj_data = json.loads(adj_res.data.decode("utf-8"))
+        self.assertTrue(adj_data["success"])
+        self.assertIn("image_base64", adj_data)
+
+        # 2. Background removal (pure white)
+        bg_res = self.client.post("/api/studio/bg-remove", json={
+            "sample_id": "luxury_watch",
+            "bg_mode": "white"
+        })
+        self.assertEqual(bg_res.status_code, 200)
+        bg_data = json.loads(bg_res.data.decode("utf-8"))
+        self.assertTrue(bg_data["success"])
+
+        # 3. Natural Language Command
+        nl_res = self.client.post("/api/studio/nl-command", json={
+            "sample_id": "luxury_watch",
+            "instruction": "Make the background pure white and increase sharpness"
+        })
+        self.assertEqual(nl_res.status_code, 200)
+        nl_data = json.loads(nl_res.data.decode("utf-8"))
+        self.assertTrue(nl_data["success"])
+        print(f"[TEST PASSED] Studio adjustments, white BG cutout, and NL command verified.")
+
+    def test_20_export_presets_api(self):
+        """Verify Amazon, Shopify, and Flipkart export compliance validation."""
+        for platform in ["amazon", "shopify", "flipkart"]:
+            res = self.client.post("/api/export/preset", json={
+                "sample_id": "luxury_watch",
+                "platform": platform,
+                "format": "jpeg"
+            })
+            self.assertEqual(res.status_code, 200)
+            data = json.loads(res.data.decode("utf-8"))
+            self.assertTrue(data["success"])
+            self.assertIn("compliance", data)
+            self.assertIn("download_url", data)
+        print("[TEST PASSED] E-Commerce Export presets (Amazon, Shopify, Flipkart) validated.")
+
+    def test_21_catalog_and_visual_search(self):
+        """Verify SQLite catalog saving, listing, and visual similarity search."""
+        # Save an item to catalog
+        save_res = self.client.post("/api/catalog/save", json={
+            "title": "Test Watch Item",
+            "sample_id": "luxury_watch",
+            "category": "Horology & Jewelry",
+            "tags": "luxury, watch, test"
+        })
+        self.assertEqual(save_res.status_code, 200)
+        save_data = json.loads(save_res.data.decode("utf-8"))
+        self.assertTrue(save_data["success"])
+
+        # List catalog
+        list_res = self.client.get("/api/catalog/list")
+        self.assertEqual(list_res.status_code, 200)
+        list_data = json.loads(list_res.data.decode("utf-8"))
+        self.assertTrue(list_data["success"])
+        self.assertGreaterEqual(len(list_data["items"]), 1)
+
+        # Visual search by text query
+        search_res = self.client.post("/api/search/visual", json={"query_text": "watch"})
+        self.assertEqual(search_res.status_code, 200)
+        search_data = json.loads(search_res.data.decode("utf-8"))
+        self.assertTrue(search_data["success"])
+        print(f"[TEST PASSED] Catalog CRUD and Visual Search verified with {len(list_data['items'])} items.")
 
 
 if __name__ == "__main__":
