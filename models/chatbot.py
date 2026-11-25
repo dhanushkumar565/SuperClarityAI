@@ -168,6 +168,18 @@ class SupplierClarityChatbot:
             r"(బెంచ్‌మార్క్.*ఫలితాలు|మోడల్స్.*పోలిక)",
             r"(बेंचमार्क.*परिणाम|मॉडल.*तुलना)"
         ],
+        "assistant_identity": [
+            r"(which|what).*model.*(are|is) you",
+            r"(who|which).*(trained|made|built|developed|created|owns).*(you|this assistant)",
+            r"(your|this assistant'?s).*(training|developer|creator|foundation model)",
+            r"(tell me|do you know).*(which|what).*model.*you",
+            r"(మీరు|నువ్వు).*(ఏ.*మోడల్|ఎవరు.*(చేశారు|నిర్మించారు|ట్రెయిన్ చేశారు))",
+            r"(మీ|ఈ అసిస్టెంట్).*(ట్రెయినింగ్|డెవలపర్|మోడల్)",
+            r"(आप|तुम).*(कौन.*सा.*मॉडल|किसने.*(बनाया|प्रशिक्षित|ट्रेन))",
+            r"(आपकी|इस असिस्टेंट की).*(ट्रेनिंग|डेवलपर|मॉडल)",
+            r"(aap|tum|apko|aapko).*(kisne|kaise).*(banaya|trained|train)",
+            r"(aap|tum).*(kaun sa|konsa|which).*model"
+        ],
         "who_made_this": [
             r"(who.*(made|built|developed|created).*this)",
             r"(smartbridge|skill.*wallet|capstone.*project|developer|credits)",
@@ -306,16 +318,17 @@ class SupplierClarityChatbot:
                     + "."
                 )
             md = (
-                "### 💡 SuperClarity AI Assistant\n\n"
-                f"I understand you asked about *{query}*. "
-                "I am the in-app guide for product image restoration, so I can help with "
-                "upscaling, model selection, quality metrics, and marketplace export settings."
+                "### 💡 How I can help\n\n"
+                "I am the in-app guide for product image restoration. I can help with:\n"
+                "- Choosing an upscaling model and scale.\n"
+                "- Reading SSIM, PSNR, and sharpness results.\n"
+                "- Preparing Amazon, Shopify, or Walmart exports.\n\n"
+                "Ask a specific question about one of these and I will give you a direct answer."
                 + context_note
-                + "\n\nTry asking about a specific feature, metric, or export preset."
             )
             sp = (
-                f"I can help you with {query} by explaining SuperClarity AI's upscaling, "
-                "metrics, or export tools."
+                "I am the in-app guide for product image restoration. I can help with "
+                "model selection, quality metrics, and marketplace exports."
             )
             sug = ["How do I upscale an image?", "Explain active result", "Amazon catalog standards"]
 
@@ -584,21 +597,36 @@ class SupplierClarityChatbot:
             sp = "SupplierClarity AI was created as an AI Capstone project in E-Commerce Computer Vision under the SmartBridge and Skill Wallet curriculum."
             sug = ["How to use this website?", "What are the demo products?", "How does Real-ESRGAN work?"]
 
+        elif intent == "assistant_identity":
+            md = (
+                "### 🤖 About me\n\n"
+                "I am the built-in **SuperClarity Assistant** for this workspace. "
+                "I answer using the application's curated knowledge base and the "
+                "AI service connected to this deployment.\n\n"
+                "- I do not have verified details about the exact foundation model "
+                "or the organisation that trained it, so I will not guess.\n"
+                "- If you meant the **image-enhancement models** in this app, they "
+                "are **Real-ESRGAN**, **EDSR**, **SRCNN**, and **Bicubic**.\n\n"
+                "Ask me about any of those models, your active image metrics, or "
+                "marketplace export settings."
+            )
+            sp = (
+                "I am the built-in SuperClarity Assistant for this workspace. I do "
+                "not have verified details about the exact foundation model or who "
+                "trained it. The image enhancement models here are Real-ESRGAN, "
+                "EDSR, SRCNN, and Bicubic."
+            )
+            sug = ["What models can I compare?", "Explain my current result", "How do I upscale an image?"]
+
         elif intent == "greeting":
             md = (
-                "### 👋 Hello! How can I help you today?\n\n"
-                "I am your **SupplierClarity AI Assistant**, designed to help you get the most out of this product image restoration platform!\n\n"
-                "Here are some things you can ask me:\n"
-                "- 🚀 *\"How do I upscale an image?\"*\n"
-                "- 📦 *\"What demo products can I test?\"*\n"
-                "- 🔍 *\"Explain my current image results\"*\n"
-                "- 🧠 *\"How does Real-ESRGAN work compared to Bicubic?\"*\n"
-                "- 🛒 *\"What are Amazon's catalog image standards?\"*\n"
-                "- 🛠️ *\"Why is my vendor image blurry?\"*\n\n"
-                "You can type your question or tap the microphone icon to speak with me in **English**, **తెలుగు (Telugu)**, or **हिंदी (Hindi)**!"
+                "### 👋 Hi! How can I help?\n\n"
+                "I can help you upscale an image, explain your quality metrics, "
+                "compare enhancement models, or prepare a marketplace export. "
+                "What would you like to do?"
             )
-            sp = "Hello! I am your SupplierClarity AI Assistant. I can help you upscale supplier images, explain telemetry, and verify catalog standards in English, Telugu, or Hindi."
-            sug = ["How to use this website?", "Explain active result", "Amazon catalog standards"]
+            sp = "Hi! I can help with image upscaling, quality metrics, model comparisons, and marketplace exports. What would you like to do?"
+            sug = ["How do I upscale an image?", "Explain my current result", "Amazon catalog standards"]
 
         else:
             guided = self._answer_from_system_prompt(query, ctx)
@@ -673,28 +701,41 @@ class SupplierClarityChatbot:
             sp = "అమెజాన్ మరియు ఫ్లిప్‌కార్ట్ జూమ్ కొరకు కనీసం 1000 పిక్సెల్స్ కోరుతాయి. 4x స్కేలింగ్ ద్వారా వీటిని సులభంగా పొందవచ్చు."
             sug = ["ప్రస్తుత ఫలితాన్ని వివరించండి", "ఫోటో ఎందుకు మసకగా ఉంది?", "ఈ టూల్ ఎలా వాడాలి?"]
 
+        elif intent == "assistant_identity":
+            md = (
+                "### 🤖 నన్ను గురించి\n\n"
+                "నేను ఈ వర్క్‌స్పేస్‌లో ఉండే **SuperClarity Assistant**ని. "
+                "యాప్‌లోని జ్ఞానం మరియు ఇక్కడకు అనుసంధానమైన AI సేవ ఆధారంగా నేను సమాధానమిస్తాను.\n\n"
+                "- నేను ఏ నిర్దిష్ట ఫౌండేషన్ మోడల్‌నో లేదా దీన్ని ట్రెయిన్ చేసిన సంస్థనో ధృవీకరించలేను, కాబట్టి ఊహించను.\n"
+                "- మీరు ఇక్కడి **ఇమేజ్ మోడల్స్** గురించి అడిగినట్టయితే అవి **Real-ESRGAN**, **EDSR**, **SRCNN**, **Bicubic**.\n\n"
+                "ఈ మోడల్స్, మీ ఇమేజ్ మెట్రిక్స్ లేదా ఎక్స్‌పోర్ట్ సెట్టింగ్స్ గురించి అడగండి."
+            )
+            sp = (
+                "నేను ఈ వర్క్‌స్పేస్‌లో ఉండే SuperClarity Assistantని. ఏ ఫౌండేషన్ మోడల్‌నో లేదా ఎవరు ట్రెయిన్ చేశారో నాకు ధృవీకరించిన సమాచారం లేదు. "
+                "ఇక్కడి ఇమేజ్ మోడల్స్ Real-ESRGAN, EDSR, SRCNN, Bicubic."
+            )
+            sug = ["ఏ మోడల్స్ పోల్చవచ్చు?", "ప్రస్తుత ఫలితాన్ని వివరించండి", "చిత్రం ఎలా అప్‌స్కేల్ చేయాలి?"]
+
         elif intent == "greeting":
             md = (
-                "### 👋 నమస్కారం! నేను మీ సప్లయర్‌క్లారిటీ AI అసిస్టెంట్‌ని\n\n"
-                "ఉత్పత్తి చిత్రాల నాణ్యత పెంపుదల, సూపర్-రిసొల్యూషన్ టూల్స్, కాటలాగ్ ప్రమాణాలు మరియు చిత్ర విశ్లేషణలో నేను మీకు సహాయం చేయగలను.\n\n"
-                "మీరు నాతో **తెలుగు**, **ఇంగ్లీష్**, లేదా **హిందీ** లో టెక్స్ట్ లేదా వాయిస్ ద్వారా మాట్లాడవచ్చు! నేను మీకు ఎలా సహాయపడగలను?"
+                "### 👋 నమస్కారం! ఎలా సహాయం చేయాలి?\n\n"
+                "చిత్రాన్ని అప్‌స్కేల్ చేయడం, నాణ్యత కొలమానాలు వివరించడం, "
+                "మోడల్స్ పోల్చడం లేదా కాటలాగ్ ఎక్స్‌పోర్ట్‌కు సిద్ధం చేయడంలో నేను సహాయపడగలను. మీకు ఏమి కావాలి?"
             )
-            sp = "నమస్కారం! నేను సప్లయర్‌క్లారిటీ AI అసిస్టెంట్‌ని. ఉత్పత్తి చిత్రాల నాణ్యత పెంపుదలలో నేను మీకు సహాయపడగలను."
-            sug = ["ఈ వెబ్‌సైట్ గురించి చెప్పండి", "ఈ టూల్ ఎలా వాడాలి?", "అమెజాన్ నిబంధనలు ఏమిటి?"]
+            sp = "నమస్కారం! చిత్రాల అప్‌స్కేలింగ్, నాణ్యత కొలమానాలు, మోడల్ పోలికలు మరియు ఎక్స్‌పోర్ట్‌లో నేను సహాయపడగలను."
+            sug = ["చిత్రం ఎలా అప్‌స్కేల్ చేయాలి?", "ప్రస్తుత ఫలితాన్ని వివరించండి", "అమెజాన్ నిబంధనలు ఏమిటి?"]
 
         else:
             md = (
-                "### 💡 సప్లయర్‌క్లారిటీ AI అసిస్టెంట్ మార్గదర్శకం\n\n"
-                f"మీ ప్రశ్న: *\"{query}\"*\n\n"
-                "సప్లయర్‌క్లారిటీ AI అనేది ఈ-కామర్స్ ఉత్పత్తి చిత్రాలను పునరుద్ధరించే ప్రత్యేక AI వ్యవస్థ. "
-                "నేను క్రింది విషయాలలో మీకు పూర్తి సహాయం చేయగలను:\n\n"
-                "- సూపర్-రిసొల్యూషన్ కొలమానాలు (SSIM, పదును, ప్రాసెసింగ్ సమయం).\n"
-                "- అమెజాన్, ఫ్లిప్‌కార్ట్ కాటలాగ్ ప్రమాణాలు.\n"
-                "- Real-ESRGAN మోడల్ పనితీరు.\n"
-                "- చిత్రాల మసకతనం మరియు కంప్రెషన్ సరిచేయడం."
+                "### 💡 నేను ఎలా సహాయం చేయగలను\n\n"
+                "నేను ఈ యాప్‌లోని ఇమేజ్ మార్గదర్శకుడిని. నేను ఇలా సహాయం చేయగలను:\n"
+                "- అప్‌స్కేల్ మోడల్ మరియు స్కేల్ ఎంచుకోవడం.\n"
+                "- SSIM, PSNR, పదును ఫలితాలు వివరించడం.\n"
+                "- అమెజాన్, షాపిఫై, వాల్‌మార్ట్ ఎక్స్‌పోర్ట్‌లకు సిద్ధం చేయడం.\n\n"
+                "ఇందులో ఏదైనా అడిగితే నేరుగా సమాధానం ఇస్తాను."
             )
-            sp = "సప్లయర్‌క్లారిటీ AI ఉత్పత్తి చిత్రాల నాణ్యత పెంపుదల మరియు కాటలాగ్ ప్రమాణాలపై ప్రత్యేక సహాయాన్ని అందిస్తుంది."
-            sug = ["ఈ వెబ్‌సైట్ గురించి చెప్పండి", "ప్రస్తుత ఫలితాన్ని వివరించండి", "ఈ టూల్ ఎలా వాడాలి?"]
+            sp = "నేను ఈ యాప్‌లోని ఇమేజ్ మార్గదర్శకుడిని. మోడల్ ఎంపిక, నాణ్యత కొలమానాలు మరియు ఎక్స్‌పోర్ట్‌లలో సహాయం చేస్తాను."
+            sug = ["చిత్రం ఎలా అప్‌స్కేల్ చేయాలి?", "ప్రస్తుత ఫలితాన్ని వివరించండి", "అమెజాన్ నిబంధనలు ఏమిటి?"]
 
         return {"markdown": md, "speech": sp, "suggestions": sug}
 
@@ -765,27 +806,40 @@ class SupplierClarityChatbot:
             sp = "अमेज़न पर ज़ूम सुविधा के लिए कम से कम 1000 पिक्सल और सफेद पृष्ठभूमि की आवश्यकता होती है। 4x स्केलिंग से इसे आसानी से प्राप्त किया जा सकता है।"
             sug = ["वर्तमान परिणाम समझाएं", "फोटो धुंधली क्यों है?", "इस टूल का उपयोग कैसे करें?"]
 
+        elif intent == "assistant_identity":
+            md = (
+                "### 🤖 मेरे बारे में\n\n"
+                "मैं इस वर्कस्पेस का अंतर-निर्मित **SuperClarity Assistant** हूँ। "
+                "मैं ऐप के ज्ञान-आधार और यहाँ जुड़ी AI सेवा के आधार पर उत्तर देता हूँ।\n\n"
+                "- मेरे पास यह सत्यापित जानकारी नहीं है कि मैं किस फाउंडेशन मॉडल पर चलता हूँ या किस संगठन ने मुझे प्रशिक्षित किया है, इसलिए मैं अनुमान नहीं लगाता।\n"
+                "- यदि आप यहाँ के **इमेज मॉडल्स** पूछ रहे हैं, तो वे **Real-ESRGAN**, **EDSR**, **SRCNN**, और **Bicubic** हैं।\n\n"
+                "इन मॉडल्स, आपकी इमेज मेट्रिक्स या एक्सपोर्ट सेटिंग्स के बारे में पूछें।"
+            )
+            sp = (
+                "मैं इस वर्कस्पेस का अंतर-निर्मित SuperClarity Assistant हूँ। मेरे पास यह सत्यापित जानकारी नहीं है कि मुझे किसने प्रशिक्षित किया है। "
+                "यहाँ के इमेज मॉडल्स Real-ESRGAN, EDSR, SRCNN और Bicubic हैं।"
+            )
+            sug = ["कौन-कौन से मॉडल हैं?", "वर्तमान परिणाम समझाएं", "इमेज कैसे अपस्केल करें?"]
+
         elif intent == "greeting":
             md = (
-                "### 👋 नमस्ते! मैं आपका सप्लायरक्लैरिटी AI असिस्टेंट हूँ\n\n"
-                "मैं ई-कॉमर्स उत्पाद छवियों की गुणवत्ता सुधारने, रिज़ॉल्यूशन बढ़ाने, कैटलॉग मानकों (अमेज़न, फ्लिपकार्ट) और मेट्रिक्स को समझाने में आपकी पूरी मदद कर सकता हूँ।\n\n"
-                "आप मुझसे **हिंदी**, **English**, या **తెలుగు** में टेक्स्ट या वॉइस द्वारा पूछ सकते हैं! मैं आपकी क्या सहायता करूँ?"
+                "### 👋 नमस्ते! मैं कैसे मदद करूँ?\n\n"
+                "मैं इमेज अपस्केल करने, गुणवत्ता मेट्रिक्स समझाने, मॉडल्स की तुलना करने "
+                "या मार्केटप्लेस एक्सपोर्ट तैयार करने में मदद कर सकता हूँ। आप क्या चाहेंगे?"
             )
-            sp = "नमस्ते! मैं आपका सप्लायरक्लैरिटी AI असिस्टेंट हूँ। आप मुझसे उत्पाद छवियों, कैटलॉग मानकों या टूल के उपयोग के बारे में पूछ सकते हैं।"
-            sug = ["इस वेबसाइट के बारे में बताएं", "इस टूल का उपयोग कैसे करें?", "अमेज़न कैटलॉग नियम"]
+            sp = "नमस्ते! मैं इमेज अपस्केलिंग, गुणवत्ता मेट्रिक्स, मॉडल तुलना और एक्सपोर्ट में मदद कर सकता हूँ।"
+            sug = ["इमेज कैसे अपस्केल करें?", "वर्तमान परिणाम समझाएं", "अमेज़न कैटलॉग नियम"]
 
         else:
             md = (
-                "### 💡 सप्लायरक्लैरिटी AI असिस्टेंट मार्गदर्शन\n\n"
-                f"आपका प्रश्न: *\"{query}\"*\n\n"
-                "मैं सप्लायरक्लैरिटी AI और ई-कॉमर्स उत्पाद इमेज अपस्केलिंग का विशेषज्ञ हूँ। "
-                "मैं इन विषयों में आपकी सहायता कर सकता हूँ:\n\n"
-                "- इमेज अपस्केलिंग और 2x/4x स्केलिंग विकल्प।\n"
-                "- इमेज मेट्रिक्स (SSIM, PSNR, शार्पनेस) का विश्लेषण।\n"
-                "- अमेज़न और फ्लिपकार्ट के कैटलॉग नियम।\n"
-                "- Real-ESRGAN मॉडल की कार्यप्रणाली।"
+                "### 💡 मैं कैसे मदद कर सकता हूँ\n\n"
+                "मैं इस ऐप का इमेज गाइड हूँ। मैं इन विषयों में मदद कर सकता हूँ:\n"
+                "- अपस्केल मॉडल और स्केल चुनना।\n"
+                "- SSIM, PSNR और शार्पनेस परिणाम समझाना।\n"
+                "- अमेज़न, शॉपिफाई और वॉलमार्ट एक्सपोर्ट तैयार करना।\n\n"
+                "इनमें से किसी विषय पर विशिष्ट प्रश्न पूछें, मैं सीधा उत्तर दूँगा।"
             )
-            sp = "सप्लायरक्लैरिटी AI उत्पाद छवि सुपर-रिज़ॉल्यूशन और कैटलॉग मानकों पर विशेष सहायता प्रदान करता है।"
-            sug = ["इस वेबसाइट के बारे में बताएं", "वर्तमान परिणाम समझाएं", "इस टूल का उपयोग कैसे करें?"]
+            sp = "मैं इस ऐप का इमेज गाइड हूँ। मॉडल चयन, गुणवत्ता मेट्रिक्स और एक्सपोर्ट में मदद कर सकता हूँ।"
+            sug = ["इमेज कैसे अपस्केल करें?", "वर्तमान परिणाम समझाएं", "अमेज़न कैटलॉग नियम"]
 
         return {"markdown": md, "speech": sp, "suggestions": sug}
