@@ -33,7 +33,7 @@ chatbot = SupplierClarityChatbot()
 # Ensure samples exist
 setup_demo_and_eval_datasets(base_dir="data")
 
-ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "webp"}
+ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "webp", "jfif", "bmp"}
 
 def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS

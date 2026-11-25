@@ -95,10 +95,27 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // =================================================================
-    // 2. FILE UPLOAD & DRAG AND DROP
+    // 2. FILE UPLOAD, GALLERY SELECTION & DRAG AND DROP
     // =================================================================
+    const btnGalleryUpload = document.getElementById("btn-gallery-upload");
+    const browseLink = document.getElementById("browse-link");
+
+    if (btnGalleryUpload) {
+        btnGalleryUpload.addEventListener("click", (e) => {
+            e.stopPropagation();
+            fileInput.click();
+        });
+    }
+
+    if (browseLink) {
+        browseLink.addEventListener("click", (e) => {
+            e.stopPropagation();
+            fileInput.click();
+        });
+    }
+
     dropZone.addEventListener("click", (e) => {
-        if (!e.target.closest("#btn-clear-upload")) {
+        if (!e.target.closest("#btn-clear-upload") && !e.target.closest("#btn-gallery-upload")) {
             fileInput.click();
         }
     });
@@ -126,10 +143,26 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
+    // Support clipboard paste (e.g. copying image from photos/gallery or web)
+    window.addEventListener("paste", (e) => {
+        if (e.clipboardData && e.clipboardData.files && e.clipboardData.files.length > 0) {
+            const file = e.clipboardData.files[0];
+            const isImg = (file.type && file.type.startsWith("image/")) || 
+                          /\.(png|jpe?g|webp|jfif|bmp)$/i.test(file.name);
+            if (isImg) {
+                handleUploadedFile(file);
+            }
+        }
+    });
+
     function handleUploadedFile(file) {
-        const validTypes = ["image/png", "image/jpeg", "image/jpg", "image/webp"];
-        if (!validTypes.includes(file.type)) {
-            alert("Please upload a valid image file (PNG, JPG, JPEG, or WEBP).");
+        if (!file) return;
+
+        // Support standard image MIME types and photo gallery formats
+        const isImage = (file.type && file.type.startsWith("image/")) || 
+                        /\.(png|jpe?g|webp|jfif|bmp)$/i.test(file.name);
+        if (!isImage) {
+            alert("Please upload a valid image file from your gallery or computer (PNG, JPG, JPEG, WEBP, BMP).");
             return;
         }
 
@@ -146,7 +179,7 @@ document.addEventListener("DOMContentLoaded", () => {
         reader.onload = (e) => {
             const tempImg = new Image();
             tempImg.onload = () => {
-                showPreview(e.target.result, file.name, `${tempImg.width}x${tempImg.height} px`);
+                showPreview(e.target.result, file.name || "gallery_upload.jpg", `${tempImg.width}x${tempImg.height} px`);
             };
             tempImg.src = e.target.result;
         };
@@ -757,4 +790,64 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
     }
+
+    // =================================================================
+    // MOUSE MOVE ANIMATION (from panwar8279/Mousemove-animation)
+    // https://mousemove-animation.vercel.app/
+    // =================================================================
+    const animBody = document.body;
+    let lastMouseMoveTs = 0;
+
+    function cursorStyle(e) {
+        const now = Date.now();
+        if (now - lastMouseMoveTs < 16) return;
+        lastMouseMoveTs = now;
+
+        const cursor = document.createElement('div');
+        cursor.setAttribute('class', 'swipe');
+        cursor.setAttribute('style', `left: ${e.clientX - 10}px; top: ${e.clientY - 10}px;`);
+
+        cursor.onanimationend = () => {
+            cursor.remove();
+        };
+        setTimeout(() => {
+            if (cursor && cursor.parentNode) cursor.remove();
+        }, 650);
+
+        animBody.insertAdjacentElement('beforeend', cursor);
+    }
+
+    document.addEventListener('mousemove', cursorStyle);
+    document.addEventListener('click', (e) => {
+        const cursor = document.createElement('div');
+        cursor.setAttribute('class', 'swipe');
+        cursor.setAttribute('style', `left: ${e.clientX - 10}px; top: ${e.clientY - 10}px;`);
+        cursor.onanimationend = () => cursor.remove();
+        setTimeout(() => {
+            if (cursor && cursor.parentNode) cursor.remove();
+        }, 650);
+        animBody.insertAdjacentElement('beforeend', cursor);
+    });
+
+    function touchStyle(e) {
+        if (!e.touches || !e.touches[0]) return;
+        const now = Date.now();
+        if (now - lastMouseMoveTs < 22) return;
+        lastMouseMoveTs = now;
+
+        const cursor = document.createElement('div');
+        cursor.setAttribute('class', 'swipe');
+        cursor.setAttribute('style', `left: ${e.touches[0].clientX - 10}px; top: ${e.touches[0].clientY - 10}px;`);
+
+        cursor.onanimationend = () => {
+            cursor.remove();
+        };
+        setTimeout(() => {
+            if (cursor && cursor.parentNode) cursor.remove();
+        }, 650);
+
+        animBody.insertAdjacentElement('beforeend', cursor);
+    }
+
+    document.addEventListener('touchmove', touchStyle, { passive: true });
 });
