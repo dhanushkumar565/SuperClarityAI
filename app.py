@@ -143,21 +143,6 @@ def index():
     return render_template("index.html")
 
 
-@app.route("/presentation")
-def presentation_view():
-    """Renders the 15-slide interactive presentation deck."""
-    return render_template("presentation.html")
-
-
-@app.route("/SuperClarity_AI_Presentation.pptx")
-def download_presentation_pptx():
-    """Direct download for the 15-slide PowerPoint deck."""
-    pptx_path = os.path.join(os.path.dirname(__file__), "SuperClarity_AI_Presentation.pptx")
-    if os.path.exists(pptx_path):
-        return send_file(pptx_path, as_attachment=True, download_name="SuperClarity_AI_Presentation.pptx")
-    return jsonify({"error": "Presentation file not found"}), 404
-
-
 @app.route("/api/samples", methods=["GET"])
 def get_samples():
     """Returns the list of available pre-loaded vendor sample products."""
