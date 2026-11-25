@@ -282,6 +282,7 @@ OK (All 9 tests passing: Home page, Samples API, 4x Upscale, 2x Upscale, File Up
 
 ## 11. Project Reports
 
+- [DATASET_TRAINING_AND_INFERENCE_REPORT.md](file:///c:/Users/yarra/Downloads/genai(2)/DATASET_TRAINING_AND_INFERENCE_REPORT.md): **Comprehensive Technical Report** covering dataset training, realistic vendor degradation formulas, deep learning architectures (Real-ESRGAN, EDSR, SRCNN), how images predict results step-by-step through the inference pipeline, and foundational computer vision concepts.
 - [DATASET_RESEARCH.md](file:///c:/Users/yarra/Downloads/genai(2)/DATASET_RESEARCH.md): Comprehensive survey of DIV2K, Flickr2K, Real-ESRGAN, ABO, Stanford Online Products, licenses, and degradation formulas.
 - [EVALUATION_REPORT.md](file:///c:/Users/yarra/Downloads/genai(2)/EVALUATION_REPORT.md): In-depth quantitative metrics, perception-distortion analysis, and qualitative failure modes.
-- [PROJECT_REPORT.md](file:///c:/Users/yarra/Downloads/genai(2)/PROJECT_REPORT.md): Formal academic project report formatted according to the SmartBridge reference demo milestones (Milestones 1–6).
+- [PROJECT_REPORT.md](file:///c:/Users/yarra/Downloads/genai(2)/PROJECT_REPORT.md): Formal academic project report formatted according to the SmartBridge reference demo milestones (Milestones 1–7).
