@@ -31,8 +31,12 @@ from dataset_pipeline import setup_demo_and_eval_datasets
 app = Flask(__name__)
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "superclarity_ai_production_secret_key_2026")
 app.config["MAX_CONTENT_LENGTH"] = 32 * 1024 * 1024  # 32 MB max upload
-app.config["UPLOAD_FOLDER"] = os.path.join("static", "uploads")
-app.config["OUTPUT_FOLDER"] = os.path.join("static", "outputs")
+if os.environ.get("VERCEL"):
+    app.config["UPLOAD_FOLDER"] = os.path.join("/tmp", "uploads")
+    app.config["OUTPUT_FOLDER"] = os.path.join("/tmp", "outputs")
+else:
+    app.config["UPLOAD_FOLDER"] = os.path.join("static", "uploads")
+    app.config["OUTPUT_FOLDER"] = os.path.join("static", "outputs")
 
 os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 os.makedirs(app.config["OUTPUT_FOLDER"], exist_ok=True)
@@ -920,7 +924,11 @@ def download_image(filename):
     safe_filename_clean = secure_filename(filename)
     file_path = os.path.join(app.config["OUTPUT_FOLDER"], safe_filename_clean)
     if not os.path.exists(file_path):
-        return jsonify({"success": False, "error": "File not found or expired."}), 404
+        fallback_path = os.path.join("static", "outputs", safe_filename_clean)
+        if os.path.exists(fallback_path):
+            file_path = fallback_path
+        else:
+            return jsonify({"success": False, "error": "File not found or expired."}), 404
         
     ext = os.path.splitext(safe_filename_clean)[1].lower()
     mime_type = "image/png"

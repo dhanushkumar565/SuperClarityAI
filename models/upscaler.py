@@ -9,13 +9,28 @@ import math
 import numpy as np
 import cv2
 from PIL import Image, ImageEnhance, ImageFilter
-import torch
-import torch.nn.functional as F
 
-from basicsr.archs.srvgg_arch import SRVGGNetCompact
-from basicsr.archs.rrdbnet_arch import RRDBNet
-from models.srcnn import SRCNN
-from models.edsr import EDSR
+try:
+    import torch
+    import torch.nn.functional as F
+    HAS_TORCH = True
+except ImportError:
+    torch = None
+    F = None
+    HAS_TORCH = False
+
+try:
+    from basicsr.archs.srvgg_arch import SRVGGNetCompact
+    from basicsr.archs.rrdbnet_arch import RRDBNet
+    from models.srcnn import SRCNN
+    from models.edsr import EDSR
+    HAS_NEURAL_MODELS = True
+except ImportError:
+    SRVGGNetCompact = None
+    RRDBNet = None
+    SRCNN = None
+    EDSR = None
+    HAS_NEURAL_MODELS = False
 
 
 class SupplierClarityUpscaler:
@@ -25,17 +40,21 @@ class SupplierClarityUpscaler:
     and provides controllable sharpening and artifact mitigation.
     """
     def __init__(self, device: str = None, weights_dir: str = "models/weights"):
-        if device is None:
-            self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        if HAS_TORCH:
+            if device is None:
+                self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+            else:
+                self.device = torch.device(device)
         else:
-            self.device = torch.device(device)
+            self.device = "cpu"
             
         self.weights_dir = weights_dir
-        os.makedirs(self.weights_dir, exist_ok=True)
+        if not os.environ.get("VERCEL"):
+            os.makedirs(self.weights_dir, exist_ok=True)
         
         # Model cache to avoid re-instantiating heavy neural nets on every request
         self._models = {}
-        print(f"[SupplierClarity Engine] Initialized on device: {self.device}")
+        print(f"[SupplierClarity Engine] Initialized on device: {self.device} (Torch: {HAS_TORCH})")
 
     # -----------------------------------------------------------------
     # MODEL LOADING & CACHING
@@ -217,7 +236,17 @@ class SupplierClarityUpscaler:
     # SPECIFIC MODEL INFERENCE HELPERS
     # -----------------------------------------------------------------
     def _infer_realesrgan(self, img_pil: Image.Image, scale: int = 4) -> Image.Image:
-        """Run Real-ESRGAN deep model inference with tile support."""
+        """Run Real-ESRGAN deep model inference with tile support, or algorithmic fallback."""
+        if not HAS_TORCH or not HAS_NEURAL_MODELS:
+            target_w, target_h = img_pil.width * scale, img_pil.height * scale
+            upscaled = img_pil.resize((target_w, target_h), Image.Resampling.LANCZOS)
+            np_img = np.array(upscaled)
+            np_smooth = cv2.bilateralFilter(np_img, d=7, sigmaColor=35, sigmaSpace=35)
+            gaussian = cv2.GaussianBlur(np_smooth, (0, 0), 1.8)
+            enhanced = cv2.addWeighted(np_smooth, 1.4, gaussian, -0.4, 0)
+            res_pil = Image.fromarray(np.clip(enhanced, 0, 255).astype(np.uint8))
+            return ImageEnhance.Sharpness(res_pil).enhance(1.2)
+
         if scale == 8:
             # 8x progressive cascaded super-resolution: 4x pass followed by 2x pass
             inter_4x = self._infer_realesrgan(img_pil, scale=4)
@@ -259,9 +288,16 @@ class SupplierClarityUpscaler:
         return out_pil
 
     def _infer_srcnn(self, img_pil: Image.Image, scale: int = 4) -> Image.Image:
-        """Run SRCNN on bicubic-upsampled tensor."""
+        """Run SRCNN on bicubic-upsampled tensor or algorithmic fallback."""
         target_w, target_h = img_pil.width * scale, img_pil.height * scale
         bicubic_pil = img_pil.resize((target_w, target_h), Image.BICUBIC)
+
+        if not HAS_TORCH or not HAS_NEURAL_MODELS:
+            np_img = np.array(bicubic_pil)
+            kernel_sharpen = np.array([[-1, -1, -1], [-1, 9, -1], [-1, -1, -1]]) / 1.0
+            sharp = cv2.filter2D(np_img, -1, kernel_sharpen)
+            blended = cv2.addWeighted(np_img, 0.7, sharp, 0.3, 0)
+            return Image.fromarray(np.clip(blended, 0, 255).astype(np.uint8))
         
         model = self._load_srcnn()
         img_np = np.array(bicubic_pil).astype(np.float32) / 255.0
@@ -275,7 +311,16 @@ class SupplierClarityUpscaler:
         return Image.fromarray(out_np)
 
     def _infer_edsr(self, img_pil: Image.Image, scale: int = 4) -> Image.Image:
-        """Run EDSR residual model."""
+        """Run EDSR residual model or algorithmic fallback."""
+        target_w, target_h = img_pil.width * scale, img_pil.height * scale
+
+        if not HAS_TORCH or not HAS_NEURAL_MODELS:
+            upscaled = img_pil.resize((target_w, target_h), Image.Resampling.LANCZOS)
+            np_img = np.array(upscaled)
+            laplacian = cv2.Laplacian(np_img, cv2.CV_64F)
+            res = np_img - 0.25 * laplacian
+            return Image.fromarray(np.clip(res, 0, 255).astype(np.uint8))
+
         if scale == 8:
             inter_4x = self._infer_edsr(img_pil, scale=4)
             return inter_4x.resize((img_pil.width * 8, img_pil.height * 8), Image.LANCZOS)
@@ -291,7 +336,7 @@ class SupplierClarityUpscaler:
         out_np = (output.squeeze(0).permute(1, 2, 0).cpu().numpy() * 255.0).astype(np.uint8)
         return Image.fromarray(out_np)
 
-    def _tile_forward(self, model: torch.nn.Module, x: torch.Tensor, tile_size: int = 512, tile_pad: int = 16, scale: int = 4) -> torch.Tensor:
+    def _tile_forward(self, model, x, tile_size: int = 512, tile_pad: int = 16, scale: int = 4):
         """Tile-based inference to process high-resolution vendor images without OOM."""
         batch, channel, height, width = x.shape
         out_h, out_w = height * scale, width * scale

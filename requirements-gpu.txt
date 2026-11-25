@@ -1,0 +1,11 @@
+# SuperClarity AI - Full Deep Neural Architecture & Model Training Dependencies
+# Use this when running on GPU servers or training custom super-resolution weights
+
+-r requirements.txt
+torch>=2.0.0
+torchvision>=0.15.0
+basicsr>=1.4.2
+realesrgan>=0.3.0
+scipy>=1.10.0
+pandas>=2.0.0
+matplotlib>=3.7.0

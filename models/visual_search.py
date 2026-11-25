@@ -7,8 +7,15 @@ dHash perceptual hashing for near-duplicate vendor image detection.
 import numpy as np
 import cv2
 from PIL import Image
-import torch
-import torchvision.transforms as T
+
+try:
+    import torch
+    import torchvision.transforms as T
+    HAS_TORCH = True
+except ImportError:
+    torch = None
+    T = None
+    HAS_TORCH = False
 
 
 class VisualSearchEngine:
@@ -17,16 +24,22 @@ class VisualSearchEngine:
     """
 
     def __init__(self):
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        if HAS_TORCH:
+            self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+            self._transform = T.Compose([
+                T.Resize((224, 224)),
+                T.ToTensor(),
+                T.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+            ])
+        else:
+            self.device = "cpu"
+            self._transform = None
         self._model = None
-        self._transform = T.Compose([
-            T.Resize((224, 224)),
-            T.ToTensor(),
-            T.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-        ])
 
     def _get_embedding_model(self):
-        """Loads lightweight MobileNetV3 feature extractor."""
+        """Loads lightweight MobileNetV3 feature extractor or returns fallback."""
+        if not HAS_TORCH:
+            return "fallback"
         if self._model is None:
             try:
                 import torchvision.models as models

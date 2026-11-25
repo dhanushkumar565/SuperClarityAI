@@ -11,14 +11,23 @@ import random
 import numpy as np
 import cv2
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
-import torch
-from torch.utils.data import Dataset, DataLoader
-import torchvision.transforms.functional as TF
+
+try:
+    import torch
+    from torch.utils.data import Dataset, DataLoader
+    import torchvision.transforms.functional as TF
+    HAS_TORCH = True
+    torch.manual_seed(42)
+except ImportError:
+    torch = None
+    Dataset = object
+    DataLoader = None
+    TF = None
+    HAS_TORCH = False
 
 # Set seeds for reproducibility
 random.seed(42)
 np.random.seed(42)
-torch.manual_seed(42)
 
 
 # =====================================================================
@@ -426,10 +435,6 @@ def setup_demo_and_eval_datasets(base_dir: str = "data"):
     hr_dir = os.path.join(base_dir, "eval_dataset", "hr")
     lr_dir = os.path.join(base_dir, "eval_dataset", "lr")
     
-    os.makedirs(samples_dir, exist_ok=True)
-    os.makedirs(hr_dir, exist_ok=True)
-    os.makedirs(lr_dir, exist_ok=True)
-    
     products = [
         ("luxury_watch", "Luxury Chronograph Watch"),
         ("sneaker_shoe", "Athletic Running Sneaker"),
@@ -438,9 +443,29 @@ def setup_demo_and_eval_datasets(base_dir: str = "data"):
         ("wireless_earbuds", "SonicPro Wireless ANC Earbuds")
     ]
     
-    print(f"[Dataset Pipeline] Generating benchmark e-commerce dataset in '{base_dir}'...")
-    
     manifest = []
+    
+    # Check if samples already exist on disk to prevent read-only filesystem issues
+    if os.path.exists(samples_dir) and len(os.listdir(samples_dir)) >= 5:
+        print(f"[Dataset Pipeline] Found existing dataset in '{base_dir}'. Using cached assets.")
+        for prod_id, prod_title in products:
+            manifest.append({
+                "id": prod_id,
+                "title": prod_title,
+                "hr_path": os.path.join(hr_dir, f"{prod_id}_hr.png"),
+                "lr_path": os.path.join(lr_dir, f"{prod_id}_lr.png"),
+                "sample_path": os.path.join(samples_dir, f"{prod_id}_supplier_input.jpg"),
+                "hr_res": "512x512",
+                "lr_res": "128x128",
+                "scale": 4
+            })
+        return manifest
+
+    os.makedirs(samples_dir, exist_ok=True)
+    os.makedirs(hr_dir, exist_ok=True)
+    os.makedirs(lr_dir, exist_ok=True)
+    
+    print(f"[Dataset Pipeline] Generating benchmark e-commerce dataset in '{base_dir}'...")
     
     for prod_id, prod_title in products:
         # 1. Generate high-resolution 512x512 ground-truth

@@ -10,12 +10,17 @@ import json
 import time
 from werkzeug.security import generate_password_hash, check_password_hash
 
-DB_PATH = os.path.join("data", "supplier_clarity.db")
+if os.environ.get("VERCEL"):
+    DB_PATH = os.path.join("/tmp", "supplier_clarity.db")
+else:
+    DB_PATH = os.path.join("data", "supplier_clarity.db")
 
 
 def get_db_connection():
     """Returns a SQLite connection with row factory enabled."""
-    os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
+    db_dir = os.path.dirname(DB_PATH)
+    if db_dir and not os.path.exists(db_dir):
+        os.makedirs(db_dir, exist_ok=True)
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     return conn
