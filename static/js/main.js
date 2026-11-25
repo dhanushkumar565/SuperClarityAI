@@ -43,9 +43,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const samplePills = document.querySelectorAll(".sample-pill");
     const scaleButtons = document.querySelectorAll("#scale-toggle-group .toggle-btn");
     const modelSelect = document.getElementById("model-select");
-    const checkAutoPreset = document.getElementById("check-auto-preset");
-    const checkDenoise = document.getElementById("check-denoise");
-    const checkSharpen = document.getElementById("check-sharpen");
     const upscaleForm = document.getElementById("upscale-form");
     const btnSubmit = document.getElementById("btn-submit");
     const btnText = btnSubmit.querySelector(".btn-text");
@@ -180,6 +177,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const chatBackdrop = document.getElementById("chat-backdrop");
     const chatDrawer = document.getElementById("chat-drawer");
     const btnHeaderAssistant = document.getElementById("btn-header-assistant");
+    const btnChatLauncher = document.getElementById("chatbot-launcher");
     const btnCloseDrawer = document.getElementById("btn-close-drawer");
     const chatMessages = document.getElementById("chat-messages");
     const chatTextInput = document.getElementById("chat-text-input");
@@ -442,13 +440,11 @@ document.addEventListener("DOMContentLoaded", () => {
         btnSubmit.disabled = true;
         btnText.classList.add("hidden");
         btnLoader.classList.remove("hidden");
+        if (window.imageGenerationLoader) window.imageGenerationLoader.start();
 
         const formData = new FormData();
         formData.append("scale", selectedScale);
         formData.append("method", currentMethod);
-        formData.append("denoise", checkDenoise.checked ? "true" : "false");
-        formData.append("sharpen", checkSharpen.checked ? "true" : "false");
-        formData.append("auto_preset", checkAutoPreset.checked ? "true" : "false");
 
         if (selectedFile) {
             formData.append("file", selectedFile);
@@ -456,6 +452,7 @@ document.addEventListener("DOMContentLoaded", () => {
             formData.append("sample_id", selectedSampleId);
         } else {
             alert("Please select a sample product or upload an image.");
+            if (window.imageGenerationLoader) window.imageGenerationLoader.stop();
             resetButtonState();
             return;
         }
@@ -466,6 +463,7 @@ document.addEventListener("DOMContentLoaded", () => {
         })
         .then(res => res.json())
         .then(data => {
+            if (window.imageGenerationLoader) window.imageGenerationLoader.stop();
             resetButtonState();
             if (data.success) {
                 renderResults(data);
@@ -474,6 +472,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         })
         .catch(err => {
+            if (window.imageGenerationLoader) window.imageGenerationLoader.stop();
             resetButtonState();
             alert("Error communicating with server: " + err.message);
         });
@@ -1019,8 +1018,12 @@ document.addEventListener("DOMContentLoaded", () => {
             const webImgPath = imgPath ? `/${imgPath.replace(/\\/g, '/')}` : "/static/samples/luxury_watch_enhanced_4x.png";
 
             card.innerHTML = `
-                <div class="catalog-card-img">
-                    <img src="${webImgPath}" alt="${item.title}">
+                <div class="background-gradient background-gradient--compact">
+                    <div class="background-gradient__content">
+                        <div class="catalog-card-img">
+                            <img src="${webImgPath}" alt="${item.title}">
+                        </div>
+                    </div>
                 </div>
                 <div class="catalog-card-body">
                     <h5>${item.title}</h5>
@@ -1143,30 +1146,70 @@ document.addEventListener("DOMContentLoaded", () => {
     let isRecording = false;
     let speechRecognition = null;
 
-    btnHeaderAssistant.addEventListener("click", () => {
-        const tabBtn = document.querySelector('[data-tab="tab-assistant"]');
-        if (tabBtn) {
-            tabBtn.click();
-            window.scrollTo({ top: 0, behavior: "smooth" });
-        } else if (chatDrawer && chatBackdrop) {
-            chatDrawer.classList.remove("hidden");
-            chatBackdrop.classList.remove("hidden");
+    function openAssistant() {
+        if (!chatDrawer || !chatBackdrop) return;
+        chatDrawer.classList.remove("hidden");
+        chatBackdrop.classList.remove("hidden");
+        if (chatTextInput) chatTextInput.focus();
+    }
+
+    function closeAssistant() {
+        if (chatDrawer) chatDrawer.classList.add("hidden");
+        if (chatBackdrop) chatBackdrop.classList.add("hidden");
+    }
+
+    if (btnHeaderAssistant) btnHeaderAssistant.addEventListener("click", openAssistant);
+    if (btnChatLauncher) btnChatLauncher.addEventListener("click", openAssistant);
+
+    if (btnCloseDrawer) btnCloseDrawer.addEventListener("click", closeAssistant);
+    if (chatBackdrop) chatBackdrop.addEventListener("click", closeAssistant);
+
+    document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && chatDrawer && !chatDrawer.classList.contains("hidden")) {
+            closeAssistant();
         }
     });
 
-    if (btnCloseDrawer) {
-        btnCloseDrawer.addEventListener("click", () => {
-            chatDrawer.classList.add("hidden");
-            chatBackdrop.classList.add("hidden");
+    // Floating dock navigation
+    document.querySelectorAll("[data-dock-tab]").forEach(button => {
+        button.addEventListener("click", () => {
+            const tabButton = document.querySelector(`[data-tab="${button.dataset.dockTab}"]`);
+            if (!tabButton) return;
+            tabButton.click();
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        });
+    });
+
+    const dockAssistantButton = document.querySelector('[data-dock-action="assistant"]');
+    if (dockAssistantButton) dockAssistantButton.addEventListener("click", openAssistant);
+
+    const dockItems = document.querySelectorAll(".floating-dock__item");
+    const dock = document.getElementById("floating-dock");
+    if (dock && dockItems.length) {
+        dock.addEventListener("mousemove", (e) => {
+            dockItems.forEach(item => {
+                const bounds = item.getBoundingClientRect();
+                const distance = Math.abs(e.clientX - (bounds.left + bounds.width / 2));
+                const scale = 1 + Math.max(0, 1 - distance / 90) * 0.28;
+                item.style.setProperty("--dock-scale", scale.toFixed(3));
+            });
+        });
+        dock.addEventListener("mouseleave", () => {
+            dockItems.forEach(item => item.style.removeProperty("--dock-scale"));
         });
     }
 
-    if (chatBackdrop) {
-        chatBackdrop.addEventListener("click", () => {
-            chatDrawer.classList.add("hidden");
-            chatBackdrop.classList.add("hidden");
+    function syncDockActiveState() {
+        const activeTab = document.querySelector(".tab-nav-btn.active");
+        dockItems.forEach(item => {
+            const isAssistant = item.dataset.dockAction === "assistant";
+            item.classList.toggle("is-active", !isAssistant && activeTab &&
+                item.dataset.dockTab === activeTab.dataset.tab);
         });
     }
+
+    tabNavButtons.forEach(button => button.addEventListener("click", syncDockActiveState));
+    syncDockActiveState();
 
     if (chatLangSelect) {
         chatLangSelect.addEventListener("change", (e) => {
@@ -1247,7 +1290,9 @@ document.addEventListener("DOMContentLoaded", () => {
         .then(r => r.json())
         .then(d => {
             if (d.success) {
-                appendMessage("bot", d.reply, "SuperClarity AI", d.language_name, d.speech_text);
+                appendMessage("bot", d.response_markdown || d.reply, "SuperClarity AI", d.language_name, d.speech_text);
+            } else {
+                appendMessage("bot", d.error || "I couldn't answer that just now. Please try again.", "SuperClarity AI");
             }
         })
         .catch(err => console.error("Chat error:", err));
@@ -1334,4 +1379,5 @@ document.addEventListener("DOMContentLoaded", () => {
         if (btnVoiceToggle) btnVoiceToggle.addEventListener("click", toggleRecording);
         if (btnTabVoiceToggle) btnTabVoiceToggle.addEventListener("click", toggleRecording);
     }
+
 });
