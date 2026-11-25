@@ -1,0 +1,34 @@
+# SupplierClarity AI Git Ignore
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.env
+myenv/
+venv/
+ENV/
+env/
+.idea/
+.vscode/
+
+# Large Binaries, Executables & Archives
+*.exe
+*.zip
+*.tar.gz
+*.7z
+cloudflared.exe
+SupplierClarity_AI_Complete_Project.zip
+
+# Temporary test artifacts
+test_chrome.png
+test.pdf
+
+# Ephemeral uploads and outputs (directories kept via .gitkeep)
+static/uploads/*
+!static/uploads/.gitkeep
+static/outputs/*
+!static/outputs/.gitkeep
+
+# Model weights (fetched dynamically or stored via release assets)
+models/weights/*.pth
+!models/weights/.gitkeep

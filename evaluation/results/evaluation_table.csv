@@ -1,0 +1,26 @@
+product_id,product_name,method_key,method_name,psnr_db,ssim,sharpness_index,gt_sharpness,latency_sec,latency_ms,input_res,output_res
+luxury_watch,Luxury Watch,bilinear,Bilinear Interpolation (Baseline),22.95,0.8425,15.9,2652.7,0.001,1.0,128x128,512x512
+luxury_watch,Luxury Watch,bicubic,Bicubic Interpolation (Baseline),22.97,0.8298,21.5,2652.7,0.002,2.1,128x128,512x512
+luxury_watch,Luxury Watch,srcnn,SRCNN (Dong et al.),19.26,0.8245,80.3,2652.7,0.289,288.6,128x128,512x512
+luxury_watch,Luxury Watch,edsr,EDSR (Lim et al.),16.84,0.2819,2678.5,2652.7,0.352,351.7,128x128,512x512
+luxury_watch,Luxury Watch,realesrgan,SupplierClarity AI (Real-ESRGAN),21.27,0.8817,1151.4,2652.7,0.277,277.4,128x128,512x512
+sneaker_shoe,Sneaker Shoe,bilinear,Bilinear Interpolation (Baseline),25.22,0.8637,4.2,918.9,0.002,2.0,128x128,512x512
+sneaker_shoe,Sneaker Shoe,bicubic,Bicubic Interpolation (Baseline),25.28,0.857,5.3,918.9,0.003,3.0,128x128,512x512
+sneaker_shoe,Sneaker Shoe,srcnn,SRCNN (Dong et al.),17.92,0.8454,79.5,918.9,0.252,251.6,128x128,512x512
+sneaker_shoe,Sneaker Shoe,edsr,EDSR (Lim et al.),15.96,0.1945,3404.1,918.9,0.297,296.9,128x128,512x512
+sneaker_shoe,Sneaker Shoe,realesrgan,SupplierClarity AI (Real-ESRGAN),26.35,0.9151,314.2,918.9,0.261,260.9,128x128,512x512
+cosmetic_serum,Cosmetic Serum,bilinear,Bilinear Interpolation (Baseline),27.13,0.9196,3.9,540.3,0.002,2.0,128x128,512x512
+cosmetic_serum,Cosmetic Serum,bicubic,Bicubic Interpolation (Baseline),27.23,0.9171,4.5,540.3,0.003,3.0,128x128,512x512
+cosmetic_serum,Cosmetic Serum,srcnn,SRCNN (Dong et al.),19.13,0.8898,79.5,540.3,0.246,246.3,128x128,512x512
+cosmetic_serum,Cosmetic Serum,edsr,EDSR (Lim et al.),16.68,0.1991,3511.4,540.3,0.309,309.2,128x128,512x512
+cosmetic_serum,Cosmetic Serum,realesrgan,SupplierClarity AI (Real-ESRGAN),25.21,0.9428,377.3,540.3,0.246,245.8,128x128,512x512
+organic_coffee_pack,Organic Coffee Pack,bilinear,Bilinear Interpolation (Baseline),21.84,0.8693,7.2,3451.3,0.003,3.1,128x128,512x512
+organic_coffee_pack,Organic Coffee Pack,bicubic,Bicubic Interpolation (Baseline),21.93,0.8642,7.9,3451.3,0.003,3.2,128x128,512x512
+organic_coffee_pack,Organic Coffee Pack,srcnn,SRCNN (Dong et al.),18.25,0.8377,80.1,3451.3,0.249,249.4,128x128,512x512
+organic_coffee_pack,Organic Coffee Pack,edsr,EDSR (Lim et al.),16.09,0.2128,3139.2,3451.3,0.315,314.9,128x128,512x512
+organic_coffee_pack,Organic Coffee Pack,realesrgan,SupplierClarity AI (Real-ESRGAN),20.95,0.9081,576.0,3451.3,0.245,244.6,128x128,512x512
+wireless_earbuds,Wireless Earbuds,bilinear,Bilinear Interpolation (Baseline),28.4,0.9306,4.1,525.2,0.002,1.5,128x128,512x512
+wireless_earbuds,Wireless Earbuds,bicubic,Bicubic Interpolation (Baseline),28.64,0.9241,4.4,525.2,0.003,3.2,128x128,512x512
+wireless_earbuds,Wireless Earbuds,srcnn,SRCNN (Dong et al.),21.14,0.9084,79.6,525.2,0.267,267.2,128x128,512x512
+wireless_earbuds,Wireless Earbuds,edsr,EDSR (Lim et al.),17.64,0.2439,3209.3,525.2,0.327,327.4,128x128,512x512
+wireless_earbuds,Wireless Earbuds,realesrgan,SupplierClarity AI (Real-ESRGAN),27.31,0.9554,313.6,525.2,0.229,228.7,128x128,512x512

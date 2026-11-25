@@ -1,0 +1,6 @@
+method_key,method_name,psnr_db,ssim,sharpness_index,latency_ms
+bicubic,Bicubic Interpolation (Baseline),25.21,0.8784,8.7,2.9
+bilinear,Bilinear Interpolation (Baseline),25.11,0.8851,7.1,1.9
+edsr,EDSR (Lim et al.),16.64,0.2264,3188.5,320.0
+realesrgan,SupplierClarity AI (Real-ESRGAN),24.22,0.9206,546.5,251.5
+srcnn,SRCNN (Dong et al.),19.14,0.8612,79.8,260.6

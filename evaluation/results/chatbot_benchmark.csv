@@ -1,0 +1,33 @@
+Query Index,Language,Query Text,Target Intent,Predicted Intent,Intent Match,Detected Lang,Lang Match,Latency (ms)
+1,EN,Can you explain the SSIM and sharpness metrics for this image?,explain_result,explain_result,PASS,EN,PASS,4.53
+2,EN,What does a 53.5x sharpness boost mean for product packaging?,explain_result,explain_result,PASS,EN,PASS,0.0
+3,EN,How does the Real-ESRGAN architecture upscale images?,model_architecture,model_architecture,PASS,EN,PASS,3.7
+4,EN,"What is the difference between SRCNN, EDSR, and Real-ESRGAN?",model_architecture,model_architecture,PASS,EN,PASS,0.0
+5,EN,What are Amazon's image standards for product listings?,catalog_standards,catalog_standards,PASS,EN,PASS,6.99
+6,EN,Does Shopify require white background product photography?,catalog_standards,catalog_standards,PASS,EN,PASS,0.0
+7,EN,Why do images from WhatsApp or suppliers look blurry and pixelated?,image_troubleshoot,image_troubleshoot,PASS,EN,PASS,2.63
+8,EN,How can I remove JPEG compression block artifacts?,image_troubleshoot,image_troubleshoot,PASS,EN,PASS,0.0
+9,EN,Why does bicubic interpolation have higher PSNR than deep learning?,tradeoff_explanation,tradeoff_explanation,PASS,EN,PASS,0.0
+10,EN,How do I upload an image and use the split comparison slider?,how_to_use,how_to_use,PASS,EN,PASS,0.0
+11,EN,"Hello, who are you and how can you assist me?",greeting,greeting,PASS,EN,PASS,5.88
+12,EN,What is the capital of France?,general_guidance,general_guidance,PASS,EN,PASS,0.0
+13,TE,ఈ ఫలితాన్ని వివరించండి,explain_result,explain_result,PASS,TE,PASS,0.0
+14,TE,SSIM స్కోర్ మరియు పదును ఏమిటి?,explain_result,explain_result,PASS,TE,PASS,0.0
+15,TE,ఈ మోడల్ ఎలా పనిచేస్తుంది మరియు దీని ఆర్కిటెక్చర్ ఏమిటి?,model_architecture,model_architecture,PASS,TE,PASS,0.0
+16,TE,రియల్-ఈఎస్ఆర్గాన్ మోడల్ వివరాలు ఏమిటి?,model_architecture,model_architecture,PASS,TE,PASS,0.0
+17,TE,అమెజాన్ కాటలాగ్ నిబంధనలు మరియు ప్రమాణాలు ఏమిటి?,catalog_standards,catalog_standards,PASS,TE,PASS,0.0
+18,TE,ఈ-కామర్స్ లో చిత్రాల కనీస రిసొల్యూషన్ ఎంత ఉండాలి?,catalog_standards,catalog_standards,PASS,TE,PASS,1.69
+19,TE,సరఫరాదారు పంపిన ఫోటో ఎందుకు అస్పష్టంగా మసకగా ఉంది?,image_troubleshoot,image_troubleshoot,PASS,TE,PASS,0.0
+20,TE,వాట్సాప్ కంప్రెషన్ వల్ల పాడైన చిత్రాన్ని ఎలా సరిచేయాలి?,image_troubleshoot,image_troubleshoot,PASS,TE,PASS,0.0
+21,TE,ఈ టూల్ ఎలా వాడాలి మరియు ఎలా డౌన్‌లోడ్ చేయాలి?,how_to_use,how_to_use,PASS,TE,PASS,0.0
+22,TE,నమస్కారం! మీరు ఎవరు?,greeting,greeting,PASS,TE,PASS,0.0
+23,HI,यह परिणाम समझाएं और मेट्रिक्स का विश्लेषण करें,explain_result,explain_result,PASS,HI,PASS,0.0
+24,HI,छवि में SSIM और स्पष्टता क्या दर्शाते हैं?,explain_result,explain_result,PASS,HI,PASS,0.0
+25,HI,यह डीप लर्निंग मॉडल कैसे काम करता है?,model_architecture,model_architecture,PASS,HI,PASS,0.0
+26,HI,रियल-ईएसआरजीएएन और ईडीएसआर में क्या अंतर है?,model_architecture,model_architecture,PASS,HI,PASS,0.0
+27,HI,अमेज़न कैटलॉग के नियम और दिशानिर्देश क्या हैं?,catalog_standards,catalog_standards,PASS,HI,PASS,0.0
+28,HI,ई-कॉमर्स उत्पाद के लिए न्यूनतम रिज़ॉल्यूशन कितना होना चाहिए?,catalog_standards,catalog_standards,PASS,HI,PASS,0.0
+29,HI,वेंडर द्वारा भेजी गई फोटो धुंधली क्यों है?,image_troubleshoot,image_troubleshoot,PASS,HI,PASS,1.16
+30,HI,व्हाट्सएप कंप्रेशन और शोर को कैसे ठीक करें?,image_troubleshoot,image_troubleshoot,PASS,HI,PASS,0.0
+31,HI,इस सिस्टम का उपयोग कैसे करें और फोटो कैसे बढ़ाएं?,how_to_use,how_to_use,PASS,HI,PASS,0.0
+32,HI,"नमस्ते, आप कौन हैं?",greeting,greeting,PASS,HI,PASS,0.0

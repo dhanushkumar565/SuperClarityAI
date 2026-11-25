@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SupplierClarity AI — Vendor Product Image Upscaler</title>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Custom Stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <!-- Animated Glowing Background Blobs -->
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+
+    <div class="app-container">
+        <!-- Navigation / Header -->
+        <header class="app-header">
+            <div class="brand">
+                <div class="brand-icon">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                </div>
+                <div class="brand-text">
+                    <h1>SupplierClarity <span class="badge-ai">AI</span></h1>
+                    <p class="tagline">Deep Learning-Powered Vendor Product Image Upscaler & Catalog Restoration</p>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button class="nav-btn primary" id="btn-header-assistant">
+                    <i class="fa-solid fa-headset"></i> AI Assistant
+                </button>
+                <button class="nav-btn" id="btn-benchmark-modal">
+                    <i class="fa-solid fa-chart-simple"></i> Benchmark Results
+                </button>
+                <a href="#architecture-section" class="nav-btn secondary">
+                    <i class="fa-solid fa-network-wired"></i> Architecture
+                </a>
+            </div>
+        </header>
+
+        <!-- Problem & Solution Overview Banner -->
+        <section class="overview-banner">
+            <div class="banner-pill">
+                <i class="fa-solid fa-store"></i> Retail & E-Commerce Catalog Solution
+            </div>
+            <h2>Eliminate Blurry Vendor Photos with Neural Super-Resolution</h2>
+            <p>
+                Retailers frequently receive low-resolution, blurry, and heavily compressed images from suppliers. 
+                <strong>SupplierClarity AI</strong> leverages state-of-the-art deep learning architectures (Real-ESRGAN, EDSR, SRCNN) 
+                to upscale vendor images up to 4×, restoring intricate product textures, brand typography, and barcode edges while preserving authentic geometry.
+            </p>
+        </section>
+
+        <!-- Main Workspace: Image Upload & Enhancement Controls -->
+        <main class="workspace-grid">
+            <div class="glass-card main-input-card">
+                <div class="card-header">
+                    <div class="header-left">
+                        <i class="fa-solid fa-cloud-arrow-up card-icon"></i>
+                        <div>
+                            <h3>Product Image Ingestion</h3>
+                            <p class="card-subtitle">Upload a supplier image or select a benchmark sample product</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sample Products Quick Selection -->
+                <div class="samples-container">
+                    <label class="input-label"><i class="fa-solid fa-cube"></i> Quick Demo Products (Click to Load):</label>
+                    <div class="sample-pills" id="sample-pills-list">
+                        <button type="button" class="sample-pill active" data-sample-id="luxury_watch">
+                            <i class="fa-solid fa-clock"></i> Luxury Watch
+                        </button>
+                        <button type="button" class="sample-pill" data-sample-id="sneaker_shoe">
+                            <i class="fa-solid fa-shoe-prints"></i> Running Sneaker
+                        </button>
+                        <button type="button" class="sample-pill" data-sample-id="cosmetic_serum">
+                            <i class="fa-solid fa-pump-soap"></i> Skincare Serum
+                        </button>
+                        <button type="button" class="sample-pill" data-sample-id="organic_coffee_pack">
+                            <i class="fa-solid fa-mug-hot"></i> Coffee & Barcode
+                        </button>
+                        <button type="button" class="sample-pill" data-sample-id="wireless_earbuds">
+                            <i class="fa-solid fa-headphones"></i> Wireless Earbuds
+                        </button>
+                    </div>
+                </div>
+
+                <!-- File Upload Zone -->
+                <div class="upload-dropzone" id="drop-zone">
+                    <input type="file" id="file-input" accept="image/png, image/jpeg, image/jpg, image/webp" hidden>
+                    <div class="dropzone-content" id="dropzone-prompt">
+                        <div class="upload-icon-circle">
+                            <i class="fa-solid fa-arrow-up-from-bracket"></i>
+                        </div>
+                        <h4>Drag and drop vendor product image here</h4>
+                        <p>or <span class="browse-link">browse from your computer</span></p>
+                        <div class="file-badges">
+                            <span class="file-badge">PNG</span>
+                            <span class="file-badge">JPG</span>
+                            <span class="file-badge">WEBP</span>
+                            <span class="file-badge">Max 16 MB</span>
+                        </div>
+                    </div>
+                    <!-- Uploaded Image Thumbnail Preview -->
+                    <div class="dropzone-preview hidden" id="dropzone-preview">
+                        <img id="preview-img" src="" alt="Vendor Input Preview">
+                        <div class="preview-overlay">
+                            <span id="preview-filename">product.jpg</span>
+                            <span id="preview-dims" class="meta-tag">128x128 px</span>
+                            <button type="button" class="btn-clear-img" id="btn-clear-upload" title="Clear Image">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Enhancement Parameters & Toggles -->
+                <form id="upscale-form" class="controls-form">
+                    <div class="controls-grid">
+                        <!-- Upscaling Factor (2x vs 4x) -->
+                        <div class="control-group">
+                            <label class="input-label"><i class="fa-solid fa-maximize"></i> Upscaling Scale Factor:</label>
+                            <div class="toggle-group" id="scale-toggle-group">
+                                <button type="button" class="toggle-btn" data-scale="2">
+                                    <span class="scale-num">2×</span>
+                                    <span class="scale-desc">High Definition</span>
+                                </button>
+                                <button type="button" class="toggle-btn active" data-scale="4">
+                                    <span class="scale-num">4×</span>
+                                    <span class="scale-desc">Ultra Catalog 4K</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- AI Model Architecture -->
+                        <div class="control-group">
+                            <label class="input-label"><i class="fa-solid fa-brain"></i> Super-Resolution Model:</label>
+                            <div class="model-select-wrapper">
+                                <select id="model-select" class="custom-select">
+                                    <option value="realesrgan" selected>SupplierClarity AI (Real-ESRGAN / SOTA)</option>
+                                    <option value="edsr">EDSR (Enhanced Deep Residual Networks)</option>
+                                    <option value="srcnn">SRCNN (Classic Super-Resolution CNN)</option>
+                                    <option value="bicubic">Bicubic Interpolation (Baseline)</option>
+                                </select>
+                                <i class="fa-solid fa-chevron-down select-arrow"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Restoration Filters -->
+                    <div class="filter-toggles">
+                        <label class="checkbox-container">
+                            <input type="checkbox" id="check-denoise" checked>
+                            <span class="checkmark"></span>
+                            <span class="checkbox-label">
+                                <strong>Vendor Compression Denoising</strong>
+                                <small>Bilateral edge-preserving filter eliminates JPEG blockiness</small>
+                            </span>
+                        </label>
+                        <label class="checkbox-container">
+                            <input type="checkbox" id="check-sharpen" checked>
+                            <span class="checkmark"></span>
+                            <span class="checkbox-label">
+                                <strong>High-Frequency Typography Sharpness</strong>
+                                <small>Sharpens micro-labels, barcode lines, and stitch contours</small>
+                            </span>
+                        </label>
+                    </div>
+
+                    <!-- Action Button -->
+                    <button type="submit" class="btn-enhance" id="btn-submit">
+                        <span class="btn-text">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> Enhance Product Image
+                        </span>
+                        <div class="btn-loader hidden">
+                            <div class="spinner"></div>
+                            <span>Processing Neural Super-Resolution...</span>
+                        </div>
+                    </button>
+                </form>
+            </div>
+        </main>
+
+        <!-- Dynamic Results Section -->
+        <section class="results-section hidden" id="results-section">
+            <div class="results-header">
+                <div class="header-left">
+                    <span class="success-badge">
+                        <i class="fa-solid fa-circle-check"></i> Enhancement Complete
+                    </span>
+                    <h2>Restored E-Commerce Product Image</h2>
+                </div>
+                <div class="header-right">
+                    <div class="view-mode-toggle">
+                        <button type="button" class="mode-btn active" id="btn-mode-slider" title="Interactive Split Wipe Slider">
+                            <i class="fa-solid fa-arrows-left-right"></i> Comparison Slider
+                        </button>
+                        <button type="button" class="mode-btn" id="btn-mode-side" title="Side-by-Side Inspection">
+                            <i class="fa-solid fa-table-columns"></i> Side-by-Side
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Comparison Viewer Container -->
+            <div class="viewer-container">
+                <!-- Mode 1: Interactive Split-Slider Wipe -->
+                <div class="split-slider-wrapper" id="slider-wrapper">
+                    <div class="slider-image-before">
+                        <img id="img-before" src="" alt="Original Low-Res Image">
+                        <span class="slider-badge badge-left">
+                            <i class="fa-solid fa-triangle-exclamation"></i> ORIGINAL SUPPLIER (LR)
+                        </span>
+                    </div>
+                    <div class="slider-image-after" id="slider-after-container">
+                        <img id="img-after" src="" alt="Enhanced High-Res Image">
+                        <span class="slider-badge badge-right">
+                            <i class="fa-solid fa-sparkles"></i> RESTORED CATALOG READY (AI 4X)
+                        </span>
+                    </div>
+                    <div class="slider-handle" id="slider-handle">
+                        <div class="handle-line"></div>
+                        <div class="handle-circle">
+                            <i class="fa-solid fa-arrows-left-right"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mode 2: Side-by-Side View -->
+                <div class="side-by-side-wrapper hidden" id="side-wrapper">
+                    <div class="side-card">
+                        <div class="side-card-header">
+                            <span class="label-muted"><i class="fa-solid fa-image"></i> Supplier Input</span>
+                            <span id="side-orig-res" class="pill-dim">128×128 px</span>
+                        </div>
+                        <div class="side-img-box">
+                            <img id="side-img-before" src="" alt="Supplier Input">
+                        </div>
+                    </div>
+                    <div class="side-card enhanced-card">
+                        <div class="side-card-header">
+                            <span class="label-accent"><i class="fa-solid fa-sparkles"></i> AI Enhanced</span>
+                            <span id="side-enh-res" class="pill-dim accent">512×512 px</span>
+                        </div>
+                        <div class="side-img-box">
+                            <img id="side-img-after" src="" alt="AI Enhanced Output">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quantitative Metrics and Technical Details Grid -->
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-icon"><i class="fa-solid fa-expand"></i></div>
+                    <div class="metric-body">
+                        <span class="metric-label">Resolution Upscaling</span>
+                        <div class="metric-value" id="metric-resolution">128×128 → 512×512</div>
+                        <span class="metric-meta" id="metric-scale">4× Geometric Super-Resolution</span>
+                    </div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-icon"><i class="fa-solid fa-bolt"></i></div>
+                    <div class="metric-body">
+                        <span class="metric-label">Inference Latency</span>
+                        <div class="metric-value" id="metric-latency">245 ms</div>
+                        <span class="metric-meta" id="metric-fps">Sub-second Real-Time CPU</span>
+                    </div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-icon"><i class="fa-solid fa-eye"></i></div>
+                    <div class="metric-body">
+                        <span class="metric-label">Tenengrad Sharpness Boost</span>
+                        <div class="metric-value accent" id="metric-sharpness">+62.8×</div>
+                        <span class="metric-meta" id="metric-sharpness-vals">Laplacian Var: 8.7 → 546.5</span>
+                    </div>
+                </div>
+
+                <div class="metric-card" id="card-ground-truth">
+                    <div class="metric-icon"><i class="fa-solid fa-bullseye"></i></div>
+                    <div class="metric-body">
+                        <span class="metric-label">Objective Quality Verification</span>
+                        <div class="metric-value" id="metric-psnr-ssim">SSIM: 0.9206 | PSNR: 24.2 dB</div>
+                        <span class="metric-meta" id="metric-gt-status">Ground-truth verified against 2K catalog</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action / Download Toolbar -->
+            <div class="download-bar">
+                <div class="download-info">
+                    <i class="fa-solid fa-download"></i>
+                    <div>
+                        <strong>Export High-Resolution Asset</strong>
+                        <p>Production-ready format suitable for Shopify, Amazon, and Magento catalogs</p>
+                    </div>
+                </div>
+                <div class="download-buttons">
+                    <a href="#" class="btn-download primary" id="btn-dl-png" download>
+                        <i class="fa-solid fa-file-image"></i> Download HD PNG
+                    </a>
+                    <a href="#" class="btn-download secondary" id="btn-dl-jpg" download>
+                        <i class="fa-solid fa-file"></i> Download Compressed JPEG
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Technical Architecture Section (Matches SmartBridge Milestone 1.3) -->
+        <section class="info-section" id="architecture-section">
+            <div class="section-title">
+                <i class="fa-solid fa-network-wired"></i>
+                <h2>System Architecture & Pipeline</h2>
+                <p>Modular three-tier deep learning architecture for enterprise retail ingestion</p>
+            </div>
+
+            <div class="architecture-diagram-card">
+                <div class="flow-step">
+                    <div class="step-num">01</div>
+                    <div class="step-icon"><i class="fa-solid fa-file-arrow-up"></i></div>
+                    <h4>Vendor Ingestion</h4>
+                    <p>Low-res supplier upload via drag & drop or ERP API. Dimensions and RGB normalization validated.</p>
+                </div>
+                <div class="flow-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+
+                <div class="flow-step">
+                    <div class="step-num">02</div>
+                    <div class="step-icon"><i class="fa-solid fa-filter"></i></div>
+                    <h4>Artifact Denoising</h4>
+                    <p>Edge-preserving bilateral filtering removes JPEG blocking artifacts and sensor noise.</p>
+                </div>
+                <div class="flow-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+
+                <div class="flow-step highlight">
+                    <div class="step-num">03</div>
+                    <div class="step-icon"><i class="fa-solid fa-microchip"></i></div>
+                    <h4>Neural Super-Res</h4>
+                    <p>Deep residual feature synthesis via Real-ESRGAN / SRVGGNetCompact with 4× sub-pixel upscaling.</p>
+                </div>
+                <div class="flow-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+
+                <div class="flow-step">
+                    <div class="step-num">04</div>
+                    <div class="step-icon"><i class="fa-solid fa-pen-nib"></i></div>
+                    <h4>Label Sharpness</h4>
+                    <p>Unsharp masking tightens high-frequency typography, barcode pitch, and fabric weave contours.</p>
+                </div>
+                <div class="flow-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+
+                <div class="flow-step">
+                    <div class="step-num">05</div>
+                    <div class="step-icon"><i class="fa-solid fa-cart-shopping"></i></div>
+                    <h4>Catalog Export</h4>
+                    <p>High-resolution asset export with verified PSNR, SSIM, and Tenengrad edge metrics.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="app-footer">
+            <div class="footer-content">
+                <p><strong>SupplierClarity AI</strong> — Vendor Product Image Upscaler & Quality Restoration</p>
+                <p class="footer-sub">Domain: E-Commerce & Retail | PyTorch · Real-ESRGAN · EDSR · SRCNN · Flask</p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Benchmark Results Modal -->
+    <div class="modal-backdrop hidden" id="benchmark-modal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <div class="header-left">
+                    <i class="fa-solid fa-chart-column modal-icon"></i>
+                    <div>
+                        <h3>Experimental Super-Resolution Benchmark</h3>
+                        <p>Actual quantitative results evaluated across 5 e-commerce product categories (Scale 4×)</p>
+                    </div>
+                </div>
+                <button type="button" class="btn-close-modal" id="btn-close-modal">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table class="benchmark-table">
+                        <thead>
+                            <tr>
+                                <th>Method / Architecture</th>
+                                <th>Mean PSNR (dB) ↑</th>
+                                <th>Mean SSIM ↑</th>
+                                <th>Tenengrad Sharpness ↑</th>
+                                <th>CPU Latency ↓</th>
+                                <th>Tradeoff Analysis</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Bilinear Interpolation</strong></td>
+                                <td>25.11 dB</td>
+                                <td>0.8851</td>
+                                <td>7.1</td>
+                                <td>1.9 ms</td>
+                                <td><span class="tag-warn">Severe Blur</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Bicubic Interpolation</strong></td>
+                                <td>25.21 dB</td>
+                                <td>0.8784</td>
+                                <td>8.7</td>
+                                <td>2.9 ms</td>
+                                <td><span class="tag-warn">Standard Baseline; Lacks Texture</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>SRCNN (Dong et al.)</strong></td>
+                                <td>19.14 dB</td>
+                                <td>0.8612</td>
+                                <td>79.8</td>
+                                <td>260.6 ms</td>
+                                <td><span class="tag-info">Moderate Edge Recovery</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>EDSR (Lim et al.)</strong></td>
+                                <td>16.64 dB</td>
+                                <td>0.2264</td>
+                                <td>3188.5</td>
+                                <td>320.0 ms</td>
+                                <td><span class="tag-info">Deep Residual Architecture</span></td>
+                            </tr>
+                            <tr class="row-highlight">
+                                <td><strong>SupplierClarity AI (Proposed)</strong></td>
+                                <td><strong>24.22 dB</strong></td>
+                                <td><strong>0.9206</strong></td>
+                                <td><strong>546.5</strong></td>
+                                <td><strong>251.5 ms</strong></td>
+                                <td><span class="tag-success">Highest SSIM & Crisp Typography</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="modal-notice">
+                    <i class="fa-solid fa-circle-info"></i>
+                    <div>
+                        <strong>The Perception-Distortion Tradeoff (Blau & Michaeli, CVPR 2018):</strong>
+                        Bicubic interpolation scores slightly higher in PSNR because pixel averaging minimizes mean squared error, but produces blurred product images. SupplierClarity AI reconstructs authentic high-frequency details, yielding a <strong>62× sharpness boost</strong> and superior structural similarity (SSIM: 0.9206).
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Intelligent Chatbot Launcher Button -->
+    <div class="chatbot-launcher" id="chatbot-launcher" title="Open Multilingual AI Assistant (Voice & Text)">
+        <div class="chatbot-pulse"></div>
+        <i class="fa-solid fa-headset launcher-icon"></i>
+        <span class="launcher-badge">AI</span>
+    </div>
+
+    <!-- Multilingual Voice-Enabled Intelligent Chatbot Panel -->
+    <div class="chatbot-drawer" id="chatbot-drawer">
+        <div class="chat-header">
+            <div class="chat-header-info">
+                <div class="assistant-avatar">
+                    <i class="fa-solid fa-robot"></i>
+                    <span class="online-indicator"></span>
+                </div>
+                <div>
+                    <h4>SupplierClarity Assistant</h4>
+                    <p class="chat-status">Multilingual Voice & Text AI</p>
+                </div>
+            </div>
+            <div class="chat-header-actions">
+                <!-- Language Selector Dropdown -->
+                <div class="lang-selector-wrapper">
+                    <select id="chat-lang-select" class="chat-lang-select" title="Choose language">
+                        <option value="en" selected>🇬🇧 English</option>
+                        <option value="te">🇮🇳 తెలుగు</option>
+                        <option value="hi">🇮🇳 हिंदी</option>
+                    </select>
+                </div>
+                <button class="chat-btn-icon" id="chat-btn-minimize" title="Minimize Chat">
+                    <i class="fa-solid fa-chevron-down"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Active ML Context Pill -->
+        <div class="chat-context-banner" id="chat-context-banner" style="display: none;">
+            <i class="fa-solid fa-link"></i>
+            <span id="chat-context-summary">Active image: Ready for explanation</span>
+            <button type="button" class="btn-explain-active" id="btn-explain-active">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> Explain Result
+            </button>
+        </div>
+
+        <!-- Message Thread Container -->
+        <div class="chat-messages" id="chat-messages">
+            <!-- Initial Welcome Message -->
+            <div class="chat-msg assistant-msg">
+                <div class="msg-avatar"><i class="fa-solid fa-robot"></i></div>
+                <div class="msg-bubble">
+                    <p><strong>Hello! 👋 I am your SupplierClarity AI Assistant.</strong></p>
+                    <p>I can help you upscale vendor images, explain telemetry (SSIM, PSNR, Tenengrad sharpness), verify Amazon/Shopify catalog compliance, and troubleshoot blur or compression.</p>
+                    <p class="msg-sub">Feel free to type or tap the microphone to speak in <strong>English</strong>, <strong>తెలుగు</strong>, or <strong>हिंदी</strong>!</p>
+                    <button type="button" class="btn-speech-play" data-speech="Hello! I am your SupplierClarity AI Assistant. I can help you upscale vendor images, explain telemetry, and verify catalog compliance in English, Telugu, or Hindi.">
+                        <i class="fa-solid fa-volume-high"></i> Listen
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Prompt Chips -->
+        <div class="chat-quick-prompts" id="chat-quick-prompts">
+            <button class="prompt-chip" data-query="Explain current upscaled result">
+                <i class="fa-solid fa-chart-line"></i> Explain Result
+            </button>
+            <button class="prompt-chip" data-query="What are Amazon catalog standards?">
+                <i class="fa-solid fa-store"></i> Amazon Standards
+            </button>
+            <button class="prompt-chip" data-query="How does Real-ESRGAN work?">
+                <i class="fa-solid fa-brain"></i> Real-ESRGAN Info
+            </button>
+            <button class="prompt-chip" data-query="Why is my product image blurry?">
+                <i class="fa-solid fa-triangle-exclamation"></i> Fix Image Blur
+            </button>
+        </div>
+
+        <!-- Chat Input Controls with Voice STT & Text -->
+        <div class="chat-input-bar">
+            <button type="button" class="btn-voice-record" id="btn-voice-record" title="Speak through microphone (Speech-to-Text)">
+                <i class="fa-solid fa-microphone"></i>
+            </button>
+            <input type="text" id="chat-text-input" placeholder="Ask a question or speak..." autocomplete="off">
+            <button type="button" class="btn-chat-send" id="btn-chat-send" title="Send message">
+                <i class="fa-solid fa-paper-plane"></i>
+            </button>
+        </div>
+        <div class="voice-status-bar" id="voice-status-bar" style="display: none;">
+            <span class="recording-pulse"></span>
+            <span id="voice-status-text">Listening in English... Speak now</span>
+        </div>
+    </div>
+
+    <!-- Main JavaScript Application Logic -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
