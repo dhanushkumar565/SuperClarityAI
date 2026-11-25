@@ -1,0 +1,196 @@
+/* =====================================================================
+   UI ENHANCEMENTS
+   - Image generation loader host
+   - Floating workspace dock
+   - Bottom-right assistant launcher / drawer placement
+===================================================================== */
+
+/* Tailwind-blue aliases used by the loader's color props */
+:root {
+    --color-blue-300: #93c5fd;
+    --color-blue-500: #3b82f6;
+    --color-blue-600: #2563eb;
+    --color-blue-800: #1e40af;
+}
+
+body {
+    padding-bottom: 110px;
+}
+
+/* ---------------------------------------------------------------------
+   IMAGE GENERATION LOADER
+--------------------------------------------------------------------- */
+.comparison-container {
+    position: relative;
+}
+
+.image-generation-loader-host {
+    position: absolute;
+    inset: 0;
+    z-index: 20;
+    overflow: hidden;
+    border-radius: 14px;
+    background: rgba(15, 23, 42, 0.35);
+}
+
+.image-generation-loader__overlay,
+.image-generation-loader__canvas {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.image-generation-loader__overlay {
+    will-change: clip-path, opacity;
+}
+
+.image-generation-loader__canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+/* ---------------------------------------------------------------------
+   FLOATING WORKSPACE DOCK
+--------------------------------------------------------------------- */
+.floating-dock {
+    position: fixed;
+    left: 50%;
+    bottom: 18px;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 10px;
+    border-radius: 18px;
+    background: rgba(18, 23, 38, 0.82);
+    border: 1px solid var(--card-border);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    z-index: 900;
+}
+
+body.light-theme .floating-dock {
+    background: rgba(255, 255, 255, 0.92);
+}
+
+.floating-dock__item {
+    position: relative;
+    flex: 0 0 auto;
+    width: 44px;
+    height: 44px;
+    border: 0;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-muted);
+    display: grid;
+    place-items: center;
+    font-size: 17px;
+    cursor: pointer;
+    transform: scale(var(--dock-scale, 1));
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+                background 0.25s ease, color 0.25s ease;
+}
+
+.floating-dock__item:hover,
+.floating-dock__item:focus-visible,
+.floating-dock__item.is-active {
+    background: rgba(139, 92, 246, 0.24);
+    color: #ffffff;
+    outline: none;
+}
+
+body.light-theme .floating-dock__item:hover,
+body.light-theme .floating-dock__item.is-active {
+    color: #6d28d9;
+}
+
+.floating-dock__label {
+    position: absolute;
+    bottom: calc(100% + 12px);
+    left: 50%;
+    transform: translateX(-50%) translateY(6px);
+    padding: 4px 10px;
+    border-radius: 8px;
+    background: rgba(15, 23, 42, 0.94);
+    border: 1px solid rgba(139, 92, 246, 0.35);
+    color: #f8fafc;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.floating-dock__item:hover .floating-dock__label,
+.floating-dock__item:focus-visible .floating-dock__label {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+/* ---------------------------------------------------------------------
+   BOTTOM-RIGHT ASSISTANT
+--------------------------------------------------------------------- */
+.chatbot-launcher {
+    display: flex !important;
+    bottom: 94px;
+    right: 24px;
+    width: 56px;
+    height: 56px;
+    z-index: 1001;
+}
+
+.chat-drawer-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(2, 6, 23, 0.35);
+    z-index: 1000;
+}
+
+.chat-drawer,
+.chatbot-drawer {
+    top: auto !important;
+    bottom: 92px !important;
+    right: 24px !important;
+    height: min(620px, calc(100vh - 130px));
+    max-height: none;
+    z-index: 1002;
+}
+
+@media (max-width: 768px) {
+    .floating-dock {
+        max-width: calc(100vw - 20px);
+        overflow-x: auto;
+        scrollbar-width: none;
+    }
+
+    .floating-dock::-webkit-scrollbar {
+        display: none;
+    }
+
+    .chatbot-launcher {
+        bottom: 92px;
+        right: 16px;
+    }
+
+    .chat-drawer,
+    .chatbot-drawer {
+        bottom: 88px !important;
+        right: 16px !important;
+        width: calc(100vw - 32px);
+        height: min(560px, calc(100vh - 120px));
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .floating-dock__item {
+        transition: background 0.2s ease, color 0.2s ease;
+        transform: none !important;
+    }
+
+    .chatbot-pulse {
+        animation: none;
+    }
+}

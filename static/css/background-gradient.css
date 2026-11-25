@@ -1,0 +1,91 @@
+/* =====================================================================
+   ANIMATED BACKGROUND GRADIENT
+   Plain-CSS port of the Aceternity UI BackgroundGradient component.
+   The two gradient layers and their timings mirror the source component;
+   Motion keyframes are expressed as CSS keyframes here because this
+   project is Flask + static CSS, not React/Next.js.
+===================================================================== */
+
+.background-gradient {
+    position: relative;
+    isolation: isolate;
+    padding: 4px;
+    border-radius: 22px;
+    background: #141316;
+}
+
+.background-gradient > .background-gradient__content {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    border-radius: inherit;
+    overflow: hidden;
+    background: #18181b;
+}
+
+body.light-theme .background-gradient {
+    background: #ffffff;
+}
+
+body.light-theme .background-gradient > .background-gradient__content {
+    background: #ffffff;
+}
+
+.background-gradient::before,
+.background-gradient::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    will-change: transform;
+    background-image:
+        radial-gradient(circle farthest-side at 0 100%, #00ccb1, transparent),
+        radial-gradient(circle farthest-side at 100% 0, #7b61ff, transparent),
+        radial-gradient(circle farthest-side at 100% 100%, #ffc414, transparent),
+        radial-gradient(circle farthest-side at 0 0, #1ca0fb, #141316);
+    background-size: 400% 400%;
+    transition: opacity 500ms ease;
+    animation: background-gradient-shift 5s ease-in-out infinite alternate;
+}
+
+/* blured halo layer: opacity-60 -> opacity-100 on hover in the source */
+.background-gradient::before {
+    opacity: 0.6;
+    filter: blur(40px);
+}
+
+/* sharp border layer: full opacity in the source */
+.background-gradient::after {
+    opacity: 1;
+}
+
+.background-gradient:hover::before {
+    opacity: 1;
+}
+
+@keyframes background-gradient-shift {
+    from { background-position: 0 50%; }
+    to { background-position: 100% 50%; }
+}
+
+/* Equivalent of animate={false} on the React component */
+.background-gradient--static::before,
+.background-gradient--static::after {
+    animation: none;
+    background-size: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .background-gradient::before,
+    .background-gradient::after {
+        animation: none;
+    }
+}
+
+/* Context-specific corner radii so the frame follows the existing UI */
+.background-gradient--viewer { border-radius: 18px; }
+.background-gradient--card { border-radius: 14px; }
+.background-gradient--compact { border-radius: 12px; }

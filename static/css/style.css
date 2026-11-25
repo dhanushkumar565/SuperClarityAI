@@ -716,6 +716,71 @@ body {
     box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6);
 }
 
+/* Aliases for the class names actually used by index.html */
+.slider-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.slider-after-container {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    clip-path: polygon(0% 0%, 50% 0%, 50% 100%, 0% 100%);
+}
+
+.slider-divider {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 4px;
+    background: #fff;
+    cursor: ew-resize;
+    z-index: 3;
+    transform: translateX(-50%);
+}
+
+.divider-line {
+    width: 100%;
+    height: 100%;
+    background: #fff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+.divider-button {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: #fff;
+    color: #1e1e2f;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
+    font-size: 13px;
+}
+
+.slider-badge.badge-before {
+    left: 14px;
+    background: rgba(239, 68, 68, 0.8);
+    color: #fff;
+}
+
+.slider-badge.badge-after {
+    right: 14px;
+    background: rgba(16, 185, 129, 0.85);
+    color: #fff;
+}
+
 .slider-image-before, .slider-image-after {
     position: absolute;
     top: 0;

@@ -10,9 +10,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <!-- Custom Stylesheet -->
+    <!-- Custom Stylesheets -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/glow-cursor.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/background-gradient.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/ui-enhancements.css') }}">
 </head>
 <body class="dark-theme">
     <!-- Animated Glowing Background Blobs -->
@@ -69,6 +71,34 @@
             </button>
             <button type="button" class="tab-nav-btn" data-tab="tab-export">
                 <i class="fa-solid fa-share-nodes"></i> Export Center
+            </button>
+        </nav>
+
+        <!-- Floating Dock: quick navigation across the workspace -->
+        <nav class="floating-dock" id="floating-dock" aria-label="Workspace quick navigation">
+            <button type="button" class="floating-dock__item" data-dock-action="assistant" title="AI Assistant" aria-label="AI Assistant">
+                <i class="fa-solid fa-robot"></i><span class="floating-dock__label">AI Assistant</span>
+            </button>
+            <button type="button" class="floating-dock__item" data-dock-tab="tab-upscaler" title="AI Upscaler (2× / 4× / 8×)" aria-label="AI Upscaler">
+                <i class="fa-solid fa-maximize"></i><span class="floating-dock__label">AI Upscaler (2× / 4× / 8×)</span>
+            </button>
+            <button type="button" class="floating-dock__item" data-dock-tab="tab-assistant" title="AI Retail Assistant" aria-label="AI Retail Assistant">
+                <i class="fa-solid fa-headset"></i><span class="floating-dock__label">AI Retail Assistant</span>
+            </button>
+            <button type="button" class="floating-dock__item" data-dock-tab="tab-studio" title="AI Studio Editor" aria-label="AI Studio Editor">
+                <i class="fa-solid fa-wand-magic"></i><span class="floating-dock__label">AI Studio Editor</span>
+            </button>
+            <button type="button" class="floating-dock__item" data-dock-tab="tab-laboratory" title="Model Lab" aria-label="Model Lab">
+                <i class="fa-solid fa-flask-vial"></i><span class="floating-dock__label">Model Lab</span>
+            </button>
+            <button type="button" class="floating-dock__item" data-dock-tab="tab-batch" title="Batch Processing" aria-label="Batch Processing">
+                <i class="fa-solid fa-layer-group"></i><span class="floating-dock__label">Batch Processing</span>
+            </button>
+            <button type="button" class="floating-dock__item" data-dock-tab="tab-catalog" title="Product Catalog & Search" aria-label="Product Catalog and Search">
+                <i class="fa-solid fa-box-archive"></i><span class="floating-dock__label">Product Catalog &amp; Search</span>
+            </button>
+            <button type="button" class="floating-dock__item" data-dock-tab="tab-export" title="Export Center" aria-label="Export Center">
+                <i class="fa-solid fa-share-nodes"></i><span class="floating-dock__label">Export Center</span>
             </button>
         </nav>
 
@@ -201,38 +231,6 @@
                                 </select>
                             </div>
 
-                            <!-- Feature Enhancement Toggles -->
-                            <div class="control-group full-width">
-                                <label class="input-label"><i class="fa-solid fa-sliders"></i> Intelligent Enhancement Pipeline:</label>
-                                <div class="checkbox-row">
-                                    <label class="custom-checkbox">
-                                        <input type="checkbox" id="check-auto-preset" checked>
-                                        <span class="checkbox-mark"></span>
-                                        <span class="checkbox-text">
-                                            <strong>Product-Aware Auto-Tuning</strong>
-                                            <small>Adapts filter parameters to detected item category (jewelry, fabric, packaging)</small>
-                                        </span>
-                                    </label>
-
-                                    <label class="custom-checkbox">
-                                        <input type="checkbox" id="check-denoise" checked>
-                                        <span class="checkbox-mark"></span>
-                                        <span class="checkbox-text">
-                                            <strong>Bilateral Artifact Suppression</strong>
-                                            <small>Dissolves lossy JPEG macroblocking without blurring edges</small>
-                                        </span>
-                                    </label>
-
-                                    <label class="custom-checkbox">
-                                        <input type="checkbox" id="check-sharpen" checked>
-                                        <span class="checkbox-mark"></span>
-                                        <span class="checkbox-text">
-                                            <strong>Micro-Typography Unsharp Masking</strong>
-                                            <small>Crisps brand logos, barcode line pitch, and fine ingredient text</small>
-                                        </span>
-                                    </label>
-                                </div>
-                            </div>
                         </div>
 
                         <!-- Submit Action Button -->
@@ -266,32 +264,36 @@
                     <!-- Comparison Container -->
                     <div class="comparison-container" id="results-section">
                         <!-- Interactive Split-Slider Viewer -->
-                        <div class="split-slider-wrapper" id="slider-wrapper">
-                            <!-- Before Image (Supplier Input) -->
-                            <img class="slider-img img-before" id="img-before" src="/static/samples/luxury_watch_supplier_input.jpg" alt="Low Resolution Input">
+                        <div class="background-gradient background-gradient--viewer">
+                            <div class="background-gradient__content">
+                                <div class="split-slider-wrapper" id="slider-wrapper">
+                                    <!-- Before Image (Supplier Input) -->
+                                    <img class="slider-img img-before" id="img-before" src="/static/samples/luxury_watch_supplier_input.jpg" alt="Low Resolution Input">
                             
-                            <!-- After Image (Neural Enhanced Output) in clipped container -->
-                            <div class="slider-after-container" id="slider-after-container">
-                                <img class="slider-img img-after" id="img-after" src="/static/samples/luxury_watch_enhanced_4x.png" alt="High Resolution Output">
-                            </div>
+                                    <!-- After Image (Neural Enhanced Output) in clipped container -->
+                                    <div class="slider-after-container" id="slider-after-container">
+                                        <img class="slider-img img-after" id="img-after" src="/static/samples/luxury_watch_enhanced_4x.png" alt="High Resolution Output">
+                                    </div>
 
-                            <!-- Central Draggable Split Handle -->
-                            <div class="slider-divider" id="slider-handle">
-                                <div class="divider-line"></div>
-                                <div class="divider-button">
-                                    <i class="fa-solid fa-chevron-left"></i>
-                                    <i class="fa-solid fa-chevron-right"></i>
-                                </div>
-                            </div>
+                                    <!-- Central Draggable Split Handle -->
+                                    <div class="slider-divider" id="slider-handle">
+                                        <div class="divider-line"></div>
+                                        <div class="divider-button">
+                                            <i class="fa-solid fa-chevron-left"></i>
+                                            <i class="fa-solid fa-chevron-right"></i>
+                                        </div>
+                                    </div>
 
-                            <!-- Overlay Resolution Badges -->
-                            <div class="slider-badge badge-before">
-                                <span>Supplier Input</span>
-                                <span class="badge-res" id="metric-res-before">128×128</span>
-                            </div>
-                            <div class="slider-badge badge-after">
-                                <span>AI Enhanced (4×)</span>
-                                <span class="badge-res" id="metric-res-after">512×512</span>
+                                    <!-- Overlay Resolution Badges -->
+                                    <div class="slider-badge badge-before">
+                                        <span>Supplier Input</span>
+                                        <span class="badge-res" id="metric-res-before">128×128</span>
+                                    </div>
+                                    <div class="slider-badge badge-after">
+                                        <span>AI Enhanced (4×)</span>
+                                        <span class="badge-res" id="metric-res-after">512×512</span>
+                                    </div>
+                                        </div>
                             </div>
                         </div>
 
@@ -302,8 +304,12 @@
                                     <span class="label-muted"><i class="fa-solid fa-image"></i> Supplier Input</span>
                                     <span id="side-orig-res" class="pill-dim">128×128 px</span>
                                 </div>
-                                <div class="side-img-box">
-                                    <img id="side-img-before" src="" alt="Supplier Input">
+                                <div class="background-gradient background-gradient--compact">
+                                    <div class="background-gradient__content">
+                                        <div class="side-img-box">
+                                            <img id="side-img-before" src="" alt="Supplier Input">
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                             <div class="side-card enhanced-card">
@@ -311,11 +317,18 @@
                                     <span class="label-accent"><i class="fa-solid fa-sparkles"></i> AI Enhanced</span>
                                     <span id="side-enh-res" class="pill-dim accent">512×512 px</span>
                                 </div>
-                                <div class="side-img-box">
-                                    <img id="side-img-after" src="" alt="AI Enhanced Output">
+                                <div class="background-gradient background-gradient--compact">
+                                    <div class="background-gradient__content">
+                                        <div class="side-img-box">
+                                            <img id="side-img-after" src="" alt="AI Enhanced Output">
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Image Generation Loader (shown while /api/upscale runs) -->
+                        <div class="image-generation-loader-host hidden" id="image-generation-loader-host"></div>
                     </div>
 
                     <!-- Quantitative Metrics Grid -->
@@ -529,8 +542,12 @@
                         </div>
                     </div>
 
-                    <div class="studio-canvas-container" id="studio-canvas-box">
-                        <img id="studio-preview-img" src="/static/samples/luxury_watch_enhanced_4x.png" alt="Studio Preview">
+                    <div class="background-gradient background-gradient--viewer">
+                        <div class="background-gradient__content">
+                            <div class="studio-canvas-container" id="studio-canvas-box">
+                                <img id="studio-preview-img" src="/static/samples/luxury_watch_enhanced_4x.png" alt="Studio Preview">
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Natural Language Voice / Text Editing Command Bar -->
@@ -648,8 +665,12 @@
                             <span class="model-title">Real-ESRGAN (SRVGGNet)</span>
                             <span class="rec-badge"><i class="fa-solid fa-star"></i> Recommended</span>
                         </div>
-                        <div class="lab-img-box">
-                            <img id="lab-img-realesrgan" src="/static/samples/luxury_watch_enhanced_4x.png" alt="Real-ESRGAN Output">
+                        <div class="background-gradient background-gradient--compact">
+                            <div class="background-gradient__content">
+                                <div class="lab-img-box">
+                                    <img id="lab-img-realesrgan" src="/static/samples/luxury_watch_enhanced_4x.png" alt="Real-ESRGAN Output">
+                                </div>
+                            </div>
                         </div>
                         <div class="lab-metrics">
                             <div class="lab-metric-item"><span>Sharpness:</span> <strong id="lab-sharp-realesrgan">546.5</strong></div>
@@ -663,8 +684,12 @@
                             <span class="model-title">EDSR (Deep Residual)</span>
                             <span class="tag-info">Residual Baseline</span>
                         </div>
-                        <div class="lab-img-box">
-                            <img id="lab-img-edsr" src="/static/samples/luxury_watch_enhanced_4x.png" alt="EDSR Output">
+                        <div class="background-gradient background-gradient--compact">
+                            <div class="background-gradient__content">
+                                <div class="lab-img-box">
+                                    <img id="lab-img-edsr" src="/static/samples/luxury_watch_enhanced_4x.png" alt="EDSR Output">
+                                </div>
+                            </div>
                         </div>
                         <div class="lab-metrics">
                             <div class="lab-metric-item"><span>Sharpness:</span> <strong id="lab-sharp-edsr">3,188</strong></div>
@@ -678,8 +703,12 @@
                             <span class="model-title">SRCNN (Classic 3-Layer)</span>
                             <span class="tag-warn">CNN Baseline</span>
                         </div>
-                        <div class="lab-img-box">
-                            <img id="lab-img-srcnn" src="/static/samples/luxury_watch_enhanced_4x.png" alt="SRCNN Output">
+                        <div class="background-gradient background-gradient--compact">
+                            <div class="background-gradient__content">
+                                <div class="lab-img-box">
+                                    <img id="lab-img-srcnn" src="/static/samples/luxury_watch_enhanced_4x.png" alt="SRCNN Output">
+                                </div>
+                            </div>
                         </div>
                         <div class="lab-metrics">
                             <div class="lab-metric-item"><span>Sharpness:</span> <strong id="lab-sharp-srcnn">79.8</strong></div>
@@ -693,8 +722,12 @@
                             <span class="model-title">Bicubic Interpolation</span>
                             <span class="tag-warn">No AI</span>
                         </div>
-                        <div class="lab-img-box">
-                            <img id="lab-img-bicubic" src="/static/samples/luxury_watch_supplier_input.jpg" alt="Bicubic Output">
+                        <div class="background-gradient background-gradient--compact">
+                            <div class="background-gradient__content">
+                                <div class="lab-img-box">
+                                    <img id="lab-img-bicubic" src="/static/samples/luxury_watch_supplier_input.jpg" alt="Bicubic Output">
+                                </div>
+                            </div>
                         </div>
                         <div class="lab-metrics">
                             <div class="lab-metric-item"><span>Sharpness:</span> <strong id="lab-sharp-bicubic">8.7</strong></div>
@@ -859,8 +892,12 @@
                             </div>
                         </div>
                     </div>
-                    <div class="export-preview-box">
-                        <img id="export-preview-img" src="/static/samples/luxury_watch_enhanced_4x.png" alt="Export Preview">
+                    <div class="background-gradient background-gradient--viewer">
+                        <div class="background-gradient__content">
+                            <div class="export-preview-box">
+                                <img id="export-preview-img" src="/static/samples/luxury_watch_enhanced_4x.png" alt="Export Preview">
+                            </div>
+                        </div>
                     </div>
                     <div class="export-meta-row">
                         <span class="meta-tag" id="export-res-tag">2000×2000 px</span>
@@ -942,10 +979,14 @@
             </div>
             <div class="modal-body">
                 <div class="explain-grid">
-                    <div class="explain-img-box">
-                        <h4>Reconstruction Heatmap (Turbo Colormap)</h4>
-                        <img id="explain-heatmap-img" src="" alt="Modification Heatmap">
-                        <p class="img-caption">Warm colors (red/yellow) indicate synthesized micro-textures and sharp edge contours; cool colors (blue/purple) indicate preserved regions.</p>
+                    <div class="background-gradient background-gradient--card">
+                        <div class="background-gradient__content">
+                            <div class="explain-img-box">
+                                <h4>Reconstruction Heatmap (Turbo Colormap)</h4>
+                                <img id="explain-heatmap-img" src="" alt="Modification Heatmap">
+                                <p class="img-caption">Warm colors (red/yellow) indicate synthesized micro-textures and sharp edge contours; cool colors (blue/purple) indicate preserved regions.</p>
+                            </div>
+                        </div>
                     </div>
                     <div class="explain-metrics-column">
                         <div class="explain-metric-item">
@@ -1056,8 +1097,13 @@
     </div>
 
     <!-- ================================================================= -->
-    <!-- SLIDE-OUT MULTILINGUAL VOICE/TEXT ASSISTANT DRAWER -->
+    <!-- FLOATING ASSISTANT LAUNCHER + SLIDE-OUT DRAWER -->
     <!-- ================================================================= -->
+    <button type="button" class="chatbot-launcher" id="chatbot-launcher" title="Open SuperClarity Assistant" aria-label="Open SuperClarity Assistant">
+        <span class="chatbot-pulse"></span>
+        <i class="fa-solid fa-robot launcher-icon"></i>
+        <span class="launcher-badge">AI</span>
+    </button>
     <div class="chat-drawer-backdrop hidden" id="chat-backdrop"></div>
     <aside class="chat-drawer hidden" id="chat-drawer">
         <div class="drawer-header">
@@ -1134,6 +1180,10 @@
 
     <!-- Glow Cursor (WebGL2 fluid light trail) -->
     <script src="{{ url_for('static', filename='js/glow-cursor.js') }}"></script>
+
+    <!-- Image Generation Loader + Main Controller -->
+    <script src="{{ url_for('static', filename='js/image-generation-loader.js') }}"></script>
+
     <!-- Main Controller Script -->
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 </body>

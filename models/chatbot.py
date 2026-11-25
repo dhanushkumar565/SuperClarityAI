@@ -31,6 +31,16 @@ class SupplierClarityChatbot:
         "hi": {"name": "हिंदी (Hindi)", "code": "hi-IN", "flag": "🇮🇳"}
     }
 
+    # Small system prompt: keeps every answer grounded in this application.
+    SYSTEM_PROMPT = (
+        "You are the SuperClarity AI Assistant, the in-app guide for a Flask "
+        "product-image super-resolution platform. Always answer the user's actual "
+        "question about image upscaling, models, telemetry, catalog compliance, or "
+        "how to use the workspace. Use the active session context when available. "
+        "If a question is outside the platform, relate it back to product image "
+        "enhancement instead of refusing. Reply in the user's selected language."
+    )
+
     # Semantic Intent Classification Patterns
     INTENT_PATTERNS = {
         "about_website": [
@@ -206,7 +216,8 @@ class SupplierClarityChatbot:
         detected_lang = self.detect_language(query)
         lang = preferred_lang if preferred_lang in self.SUPPORTED_LANGUAGES else detected_lang
         intent = self.classify_intent(query)
-        ctx = context or {}
+        ctx = dict(context or {})
+        ctx["system_prompt"] = self.SYSTEM_PROMPT
         has_active_result = bool(ctx.get("enhanced_resolution") or ctx.get("scale"))
 
         if lang == "te":
@@ -234,6 +245,81 @@ class SupplierClarityChatbot:
             "context_active": has_active_result,
             "latency_ms": elapsed_ms
         }
+
+    # =========================================================================
+    # SYSTEM-PROMPT-GUIDED FALLBACK
+    # =========================================================================
+    def _answer_from_system_prompt(
+        self,
+        query: str,
+        ctx: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """Produce a focused answer when no specific intent pattern matched."""
+        text = (query or "").lower()
+        scale = ctx.get("scale")
+        method = ctx.get("method")
+
+        if any(word in text for word in ("catalog", "amazon", "shopify", "walmart")):
+            md = (
+                "### 🛒 Catalog Readiness\n\n"
+                "For marketplace-ready images, use a clean white or transparent "
+                "background, keep the product centered, and export at 2× or 4× "
+                "with the PNG download. The Export Center has Amazon, Shopify, "
+                "and Walmart presets that apply the right sizing and file format."
+            )
+            sp = "Use the Export Center presets for Amazon, Shopify, or Walmart catalog-ready images."
+            sug = ["Explain my current result", "Which export preset should I use?"]
+        elif any(word in text for word in ("model", "realesrgan", "edsr", "srcnn", "bicubic")):
+            md = (
+                "### 🧠 Model Guidance\n\n"
+                "**Real-ESRGAN** is the recommended default for e-commerce product photos. "
+                "Use **EDSR** for the sharpest fine text, **SRCNN** as a lightweight baseline, "
+                "and **Bicubic** only as a non-AI comparison. You can compare all four in Model Lab."
+            )
+            sp = "Real-ESRGAN is the recommended model; compare all four models in Model Lab."
+            sug = ["Explain Perception-Distortion tradeoff", "Open Model Lab"]
+        elif any(word in text for word in ("sharp", "ssim", "psnr", "metric", "score")):
+            md = (
+                "### 📊 Reading the Metrics\n\n"
+                "**SSIM** measures structural similarity to the original, **PSNR** measures "
+                "pixel-level error, and **Tenengrad sharpness** tracks edge strength. "
+                "Higher SSIM and sharpness with low latency indicates a successful enhancement."
+            )
+            sp = "SSIM measures structure, PSNR measures pixel error, and Tenengrad sharpness measures edge strength."
+            sug = ["Explain active result", "What is a good SSIM score?"]
+        elif any(word in text for word in ("upload", "sample", "scale", "use", "start", "how")):
+            md = (
+                "### 🚀 Quick Start\n\n"
+                "1. Pick a demo product or upload your supplier image.\n"
+                "2. Choose 2×, 4×, or 8× upscaling.\n"
+                "3. Click **Enhance Product Image** and watch the generation loader.\n"
+                "4. Inspect the result with the split slider or side-by-side view."
+            )
+            sp = "Pick an image, choose a scale, click Enhance Product Image, then inspect the result."
+            sug = ["What demo products can I test?", "Explain active result"]
+        else:
+            context_note = ""
+            if scale:
+                context_note = (
+                    f"\n\nYour active session is set to **{scale}×**"
+                    + (f" using **{method}**" if method else "")
+                    + "."
+                )
+            md = (
+                "### 💡 SuperClarity AI Assistant\n\n"
+                f"I understand you asked about *{query}*. "
+                "I am the in-app guide for product image restoration, so I can help with "
+                "upscaling, model selection, quality metrics, and marketplace export settings."
+                + context_note
+                + "\n\nTry asking about a specific feature, metric, or export preset."
+            )
+            sp = (
+                f"I can help you with {query} by explaining SuperClarity AI's upscaling, "
+                "metrics, or export tools."
+            )
+            sug = ["How do I upscale an image?", "Explain active result", "Amazon catalog standards"]
+
+        return {"markdown": md, "speech": sp, "suggestions": sug}
 
     # =========================================================================
     # 1. ENGLISH CHATGPT-STYLE CONVERSATIONAL ENGINE
@@ -515,19 +601,8 @@ class SupplierClarityChatbot:
             sug = ["How to use this website?", "Explain active result", "Amazon catalog standards"]
 
         else:
-            md = (
-                "### 💡 SupplierClarity AI Assistant\n\n"
-                f"You asked: *\"{query}\"*\n\n"
-                "I am dedicated to helping you with **SupplierClarity AI** and e-commerce product image enhancement! "
-                "Here is what I specialize in:\n\n"
-                "- **Image Upscaling & Restoration:** How to use the 2×/4× scaling tools and denoising filters.\n"
-                "- **Result Telemetry:** Detailed explanations of SSIM, PSNR, Tenengrad sharpness, and CPU latency.\n"
-                "- **Catalog Compliance:** Meeting Amazon, Shopify, and Walmart photography standards.\n"
-                "- **Model Architectures:** Real-ESRGAN, EDSR, SRCNN, and the Perception-Distortion tradeoff.\n\n"
-                "Feel free to ask any question about the website or select one of the suggested prompts below!"
-            )
-            sp = "I am your SupplierClarity AI Assistant. Feel free to ask about product image super-resolution, catalog standards, or how to use the website."
-            sug = ["How to use this website?", "What are the demo products?", "Explain active result"]
+            guided = self._answer_from_system_prompt(query, ctx)
+            md, sp, sug = guided["markdown"], guided["speech"], guided["suggestions"]
 
         return {"markdown": md, "speech": sp, "suggestions": sug}
 
