@@ -11,6 +11,8 @@ import time
 import base64
 import json
 import uuid
+import re
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from flask import Flask, render_template, request, jsonify, send_file, session
 from werkzeug.utils import secure_filename
 from PIL import Image
@@ -19,6 +21,11 @@ import cv2
 
 from models.upscaler import SupplierClarityUpscaler
 from models.chatbot import SupplierClarityChatbot
+from models.llm_provider import (
+    PROVIDER_DEFAULTS,
+    generate_llm_reply,
+    normalize_provider,
+)
 from models.product_analyzer import ProductAnalyzer
 from models.studio_editor import StudioEditor
 from models.explainability import ExplainabilityEngine
@@ -43,6 +50,12 @@ os.makedirs(app.config["OUTPUT_FOLDER"], exist_ok=True)
 
 # Initialize Core AI Engines
 upscaler = SupplierClarityUpscaler()
+# Isolated engines let Model Lab run all four methods concurrently without
+# sharing mutable model caches across threads.
+comparison_engines = {
+    name: SupplierClarityUpscaler()
+    for name in ("realesrgan", "edsr", "srcnn", "bicubic")
+}
 chatbot = SupplierClarityChatbot()
 analyzer = ProductAnalyzer()
 studio = StudioEditor()
@@ -539,34 +552,52 @@ def studio_natural_language():
 
 @app.route("/api/models/compare", methods=["POST"])
 def compare_models():
-    """Runs multiple super-resolution models on the same image for side-by-side comparison."""
+    """Run all four super-resolution models in parallel on the same image."""
     try:
         req_data = request.json if request.is_json else request.form
         img_pil, _, _ = decode_image_from_request(request)
+        # Fully load and detach from the source file before sharing across threads.
+        base_img = img_pil.copy()
+        base_img.load()
         scale = int(req_data.get("scale", 4))
         models_to_test = ["realesrgan", "edsr", "srcnn", "bicubic"]
 
+        def run_model(model_name):
+            try:
+                result = comparison_engines[model_name].upscale(
+                    base_img.copy(), scale=scale, method=model_name,
+                    denoise=True, sharpen=True
+                )
+                out_img = result["image"]
+                b64 = pil_to_base64(out_img, format="JPEG")
+                gray = cv2.cvtColor(np.array(out_img), cv2.COLOR_RGB2GRAY)
+                sharpness = round(float(cv2.Laplacian(gray, cv2.CV_64F).var()), 1)
+                return model_name, {
+                    "success": True,
+                    "method_name": "Real-ESRGAN" if model_name == "realesrgan" else model_name.upper(),
+                    "image_base64": f"data:image/jpeg;base64,{b64}",
+                    "resolution": f"{out_img.width}x{out_img.height}",
+                    "latency_ms": result["latency_ms"],
+                    "sharpness": sharpness,
+                    "is_recommended": model_name == "realesrgan",
+                }
+            except Exception as exc:
+                return model_name, {"success": False, "error": str(exc)}
+
         comparison_results = {}
-        for m in models_to_test:
-            res = upscaler.upscale(img_pil, scale=scale, method=m, denoise=True, sharpen=True)
-            out_img = res["image"]
-            b64 = pil_to_base64(out_img, format="JPEG")
+        with ThreadPoolExecutor(max_workers=len(models_to_test)) as executor:
+            futures = {executor.submit(run_model, m): m for m in models_to_test}
+            for future in as_completed(futures):
+                model_name, payload = future.result()
+                comparison_results[model_name] = payload
 
-            gray = cv2.cvtColor(np.array(out_img), cv2.COLOR_RGB2GRAY)
-            sharpness = round(float(cv2.Laplacian(gray, cv2.CV_64F).var()), 1)
-
-            comparison_results[m] = {
-                "method_name": m.upper() if m != "realesrgan" else "Real-ESRGAN",
-                "image_base64": f"data:image/jpeg;base64,{b64}",
-                "resolution": f"{out_img.width}x{out_img.height}",
-                "latency_ms": res["latency_ms"],
-                "sharpness": sharpness,
-                "is_recommended": m == "realesrgan"
-            }
-
+        completed = sum(1 for value in comparison_results.values() if value.get("success"))
         return jsonify({
-            "success": True,
+            "success": completed > 0,
             "scale": scale,
+            "parallel": True,
+            "completed_count": completed,
+            "total_count": len(models_to_test),
             "comparison": comparison_results,
             "results": comparison_results
         })
@@ -971,12 +1002,72 @@ def get_chat_languages():
     })
 
 
+def _markdown_to_speech(text: str) -> str:
+    """Create a clean voiceover string from markdown answer text."""
+    cleaned = re.sub(r"```.*?```", " ", text or "", flags=re.S)
+    cleaned = re.sub(r"[#*_`>|\[\]]", " ", cleaned)
+    cleaned = re.sub(r"^\s*[-+]\s+", "", cleaned, flags=re.M)
+    return re.sub(r"\s+", " ", cleaned).strip()[:1200]
+
+
+def _llm_system_prompt(language: str, context: dict, provider_label: str, model_name: str) -> str:
+    """Ground an optional hosted model in this app and its active session."""
+    language_names = {"en": "English", "te": "Telugu", "hi": "Hindi"}
+    language_line = (
+        f"Reply only in {language_names[language]}."
+        if language in language_names
+        else "Detect the user's language and reply in the same language."
+    )
+    parts = [
+        chatbot.SYSTEM_PROMPT,
+        "You are answering inside the SuperClarity AI product-image workspace.",
+        (
+            "When asked which model or who trained you, say you are the SuperClarity "
+            f"Assistant and that this workspace is currently configured with "
+            f"{provider_label} ({model_name}). Do not invent a training organisation "
+            "or claim to be a different product."
+        ),
+        language_line,
+        "Keep answers direct, practical, and under 180 words unless the user asks for detail.",
+        "Use short markdown headings and bullet points when they improve clarity.",
+    ]
+    active_bits = []
+    if context.get("active_sample"):
+        active_bits.append(f"active sample: {context['active_sample']}")
+    if context.get("scale"):
+        active_bits.append(f"selected upscale: {context['scale']}x")
+    if context.get("method"):
+        active_bits.append(f"method: {context['method']}")
+    if context.get("has_enhanced_image"):
+        active_bits.append("an enhanced image is currently loaded")
+    if active_bits:
+        parts.append("Active session: " + "; ".join(active_bits) + ".")
+    return " ".join(parts)
+
+
+@app.route("/api/chat/providers", methods=["GET"])
+def chat_providers():
+    """Expose safe provider defaults (never any stored key)."""
+    return jsonify({
+        "success": True,
+        "providers": [
+            {
+                "id": key,
+                "label": value["label"],
+                "default_model": value["model"],
+                "default_base_url": value["base_url"],
+            }
+            for key, value in PROVIDER_DEFAULTS.items()
+        ],
+    })
+
+
 @app.route("/api/chat", methods=["POST"])
 def chat():
     """
-    Intelligent Multilingual Voice-Enabled Assistant Endpoint.
-    Accepts text or voice transcripts in English, Telugu, or Hindi,
-    and returns context-aware guidance with speech synthesis payload.
+    Multilingual assistant endpoint. Uses the built-in guide by default, or a
+    user-supplied Groq / Gemini / NVIDIA NIM key when present in the request.
+    Keys are used for this request only and are never stored server-side.
     """
     try:
         data = request.get_json(silent=True) or {}
@@ -987,14 +1078,56 @@ def chat():
         language = data.get("language", "auto")
         if language == "auto":
             language = None
+        if language not in chatbot.SUPPORTED_LANGUAGES:
+            language = None
 
-        context = data.get("context", {})
-
+        context = data.get("context", {}) or {}
         result = chatbot.generate_response(
             query=message,
             preferred_lang=language,
             context=context
         )
+        result["provider_used"] = "Built-in guide"
+
+        provider = normalize_provider(data.get("provider"))
+        api_key = str(data.get("api_key") or "").strip()
+        if provider and api_key:
+            model_name = str(data.get("model") or "").strip() or PROVIDER_DEFAULTS[provider]["model"]
+            base_url = str(data.get("base_url") or "").strip()
+            active_language = language or result.get("active_language", "en")
+            system_prompt = _llm_system_prompt(
+                active_language,
+                context,
+                PROVIDER_DEFAULTS[provider]["label"],
+                model_name,
+            )
+            try:
+                reply = generate_llm_reply(
+                    provider=provider,
+                    api_key=api_key,
+                    message=message,
+                    system_prompt=system_prompt,
+                    model=model_name,
+                    base_url=base_url,
+                )
+                result.update({
+                    "response_markdown": reply["text"],
+                    "speech_text": _markdown_to_speech(reply["text"]),
+                    "intent": "external_llm",
+                    "provider_used": reply["provider_label"],
+                    "model_used": reply["model"],
+                    "active_language": active_language,
+                    "language_name": chatbot.SUPPORTED_LANGUAGES.get(
+                        active_language, chatbot.SUPPORTED_LANGUAGES["en"]
+                    )["name"],
+                    "notice": "",
+                })
+            except Exception as exc:
+                result["notice"] = (
+                    f"{PROVIDER_DEFAULTS[provider]['label']} could not be reached; "
+                    f"used the built-in guide. {exc}"
+                )
+
         return jsonify(result)
 
     except Exception as e:

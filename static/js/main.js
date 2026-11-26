@@ -25,6 +25,8 @@ document.addEventListener("DOMContentLoaded", () => {
     // =================================================================
     const tabContents = document.querySelectorAll(".tab-content");
     const dockTabButtons = document.querySelectorAll("[data-dock-tab]");
+    const dockItems = dockTabButtons;
+    const dock = document.getElementById("floating-dock");
     const btnThemeToggle = document.getElementById("btn-theme-toggle");
 
     // =================================================================
@@ -105,6 +107,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const valSaturation = document.getElementById("val-saturation");
     const valSharpness = document.getElementById("val-sharpness");
     const btnApplySliders = document.getElementById("btn-apply-sliders");
+    const studioAdjustStatus = document.getElementById("studio-adjust-status");
     const btnStudioDownload = document.getElementById("btn-studio-download");
     const nlCommandInput = document.getElementById("nl-command-input");
     const btnStudioNlRun = document.getElementById("btn-studio-nl-run");
@@ -117,6 +120,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // DOM REFERENCES: MODEL LAB
     // =================================================================
     const btnRunModelComparison = document.getElementById("btn-run-model-comparison");
+    const labRunSummary = document.getElementById("lab-run-summary");
 
     // =================================================================
     // DOM REFERENCES: BATCH PROCESSING
@@ -186,6 +190,16 @@ document.addEventListener("DOMContentLoaded", () => {
     const chatLangSelect = document.getElementById("chat-lang-select");
     const telemetryRibbonText = document.getElementById("telemetry-ribbon-text");
     const chatChips = document.querySelectorAll(".chat-chip");
+    const llmSettingsToggle = document.getElementById("llm-settings-toggle");
+    const llmSettingsPanel = document.getElementById("llm-settings");
+    const llmProviderSelect = document.getElementById("llm-provider");
+    const llmApiKeyInput = document.getElementById("llm-api-key");
+    const llmModelInput = document.getElementById("llm-model");
+    const llmBaseUrlInput = document.getElementById("llm-base-url");
+    const llmBaseUrlField = document.getElementById("llm-base-url-field");
+    const llmSaveButton = document.getElementById("llm-save");
+    const llmClearButton = document.getElementById("llm-clear");
+    const llmStatus = document.getElementById("llm-settings-status");
 
     // =================================================================
     // 1. TAB ROUTING & THEME TOGGLE
@@ -748,14 +762,36 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (btnApplySliders) {
         btnApplySliders.addEventListener("click", () => {
+            if (!currentStudioImageB64 && !activeEnhancedImageB64 && !selectedSampleId) {
+                if (studioAdjustStatus) studioAdjustStatus.textContent = "Load an image in the Studio first.";
+                return;
+            }
+
             const fd = getActiveStudioPayload();
             fd.append("brightness", sliderBrightness.value);
             fd.append("contrast", sliderContrast.value);
             fd.append("saturation", sliderSaturation.value);
             fd.append("sharpness", sliderSharpness.value);
+
+            btnApplySliders.disabled = true;
+            if (studioAdjustStatus) studioAdjustStatus.textContent = "Applying adjustments…";
+
             fetch("/api/studio/adjust", { method: "POST", body: fd })
                 .then(r => r.json())
-                .then(d => { if (d.success) updateStudioImage(d.image, d.download_url); });
+                .then(d => {
+                    if (d.success) {
+                        updateStudioImage(d.image, d.download_url);
+                        if (studioAdjustStatus) studioAdjustStatus.textContent = "Adjustments applied.";
+                    } else if (studioAdjustStatus) {
+                        studioAdjustStatus.textContent = d.error || "Could not apply adjustments.";
+                    }
+                })
+                .catch(err => {
+                    if (studioAdjustStatus) studioAdjustStatus.textContent = `Adjustment failed: ${err.message}`;
+                })
+                .finally(() => {
+                    btnApplySliders.disabled = false;
+                });
         });
     }
 
@@ -804,10 +840,21 @@ document.addEventListener("DOMContentLoaded", () => {
     // =================================================================
     // 9. MULTI-MODEL LABORATORY
     // =================================================================
+    const labModels = ["realesrgan", "edsr", "srcnn", "bicubic"];
+
+    function setLabStatus(model, text, state = "") {
+        const el = document.getElementById(`lab-status-${model}`);
+        if (!el) return;
+        el.textContent = text;
+        el.className = "lab-run-status" + (state ? ` is-${state}` : "");
+    }
+
     if (btnRunModelComparison) {
         btnRunModelComparison.addEventListener("click", () => {
             btnRunModelComparison.disabled = true;
-            btnRunModelComparison.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing 4 Models...';
+            btnRunModelComparison.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Running 4 Models in Parallel...';
+            labModels.forEach(model => setLabStatus(model, "Running…", "running"));
+            if (labRunSummary) labRunSummary.textContent = "";
 
             const fd = new FormData();
             fd.append("scale", selectedScale);
@@ -820,36 +867,36 @@ document.addEventListener("DOMContentLoaded", () => {
             fetch("/api/models/compare", { method: "POST", body: fd })
                 .then(r => r.json())
                 .then(d => {
-                    btnRunModelComparison.disabled = false;
-                    btnRunModelComparison.innerHTML = '<i class="fa-solid fa-play"></i> Run All 4 Models';
-                    if (d.success && d.comparison) {
-                        const comp = d.comparison;
-                        if (comp.realesrgan) {
-                            document.getElementById("lab-img-realesrgan").src = comp.realesrgan.image_base64;
-                            document.getElementById("lab-sharp-realesrgan").textContent = comp.realesrgan.sharpness;
-                            document.getElementById("lab-latency-realesrgan").textContent = `${comp.realesrgan.latency_ms} ms`;
+                    if (!d.success || !d.comparison) {
+                        labModels.forEach(model => setLabStatus(model, d.error || "Failed", "error"));
+                        if (labRunSummary) labRunSummary.textContent = d.error || "Model run failed.";
+                        return;
+                    }
+
+                    labModels.forEach(model => {
+                        const result = d.comparison[model];
+                        if (!result || !result.success) {
+                            setLabStatus(model, "Failed", "error");
+                            return;
                         }
-                        if (comp.edsr) {
-                            document.getElementById("lab-img-edsr").src = comp.edsr.image_base64;
-                            document.getElementById("lab-sharp-edsr").textContent = comp.edsr.sharpness;
-                            document.getElementById("lab-latency-edsr").textContent = `${comp.edsr.latency_ms} ms`;
-                        }
-                        if (comp.srcnn) {
-                            document.getElementById("lab-img-srcnn").src = comp.srcnn.image_base64;
-                            document.getElementById("lab-sharp-srcnn").textContent = comp.srcnn.sharpness;
-                            document.getElementById("lab-latency-srcnn").textContent = `${comp.srcnn.latency_ms} ms`;
-                        }
-                        if (comp.bicubic) {
-                            document.getElementById("lab-img-bicubic").src = comp.bicubic.image_base64;
-                            document.getElementById("lab-sharp-bicubic").textContent = comp.bicubic.sharpness;
-                            document.getElementById("lab-latency-bicubic").textContent = `${comp.bicubic.latency_ms} ms`;
-                        }
+                        document.getElementById(`lab-img-${model}`).src = result.image_base64;
+                        document.getElementById(`lab-sharp-${model}`).textContent = result.sharpness;
+                        document.getElementById(`lab-latency-${model}`).textContent = `${result.latency_ms} ms`;
+                        setLabStatus(model, `${result.latency_ms} ms`, "done");
+                    });
+
+                    if (labRunSummary) {
+                        labRunSummary.textContent = `All 4 models finished · ${d.completed_count}/${d.total_count} succeeded`;
                     }
                 })
                 .catch(err => {
+                    labModels.forEach(model => setLabStatus(model, "Error", "error"));
+                    if (labRunSummary) labRunSummary.textContent = `Comparison error: ${err.message}`;
+                    console.error("Comparison error:", err);
+                })
+                .finally(() => {
                     btnRunModelComparison.disabled = false;
                     btnRunModelComparison.innerHTML = '<i class="fa-solid fa-play"></i> Run All 4 Models';
-                    console.error("Comparison error:", err);
                 });
         });
     }
@@ -1144,6 +1191,102 @@ document.addEventListener("DOMContentLoaded", () => {
     // =================================================================
     // 14. MULTILINGUAL ASSISTANT (Chat & Web Speech API)
     // =================================================================
+    const LLM_DEFAULTS = {
+        builtin: { model: "", baseUrl: "", label: "Built-in guide" },
+        groq: { model: "llama-3.3-70b-versatile", baseUrl: "https://api.groq.com/openai/v1", label: "Groq" },
+        gemini: { model: "gemini-2.0-flash", baseUrl: "https://generativelanguage.googleapis.com/v1beta", label: "Gemini" },
+        nim: { model: "meta/llama-3.3-70b-instruct", baseUrl: "https://integrate.api.nvidia.com/v1", label: "NVIDIA NIM" }
+    };
+    const LLM_STORAGE_KEY = "superclarity_llm_settings";
+    let currentLlmSettings = { provider: "builtin", apiKey: "", model: "", baseUrl: "" };
+
+    function setLlmStatus(message, isError = false) {
+        if (!llmStatus) return;
+        llmStatus.textContent = message;
+        llmStatus.classList.toggle("is-error", !!isError);
+    }
+
+    function loadLlmSettings() {
+        try {
+            const saved = JSON.parse(localStorage.getItem(LLM_STORAGE_KEY) || "{}");
+            currentLlmSettings = {
+                provider: LLM_DEFAULTS[saved.provider] ? saved.provider : "builtin",
+                apiKey: saved.apiKey || "",
+                model: saved.model || "",
+                baseUrl: saved.baseUrl || ""
+            };
+        } catch (err) {
+            currentLlmSettings = { provider: "builtin", apiKey: "", model: "", baseUrl: "" };
+        }
+        applyLlmSettingsToForm();
+    }
+
+    function applyLlmSettingsToForm() {
+        if (!llmProviderSelect) return;
+        const provider = currentLlmSettings.provider;
+        llmProviderSelect.value = provider;
+        llmModelInput.value = currentLlmSettings.model || LLM_DEFAULTS[provider].model;
+        llmBaseUrlInput.value = currentLlmSettings.baseUrl || LLM_DEFAULTS[provider].baseUrl;
+        llmApiKeyInput.value = currentLlmSettings.apiKey;
+        if (llmBaseUrlField) llmBaseUrlField.classList.toggle("hidden", provider !== "nim");
+        setLlmStatus(
+            provider === "builtin"
+                ? "Using the built-in guide."
+                : `${LLM_DEFAULTS[provider].label} saved in this browser.`
+        );
+    }
+
+    function handleProviderChange() {
+        const provider = llmProviderSelect ? llmProviderSelect.value : "builtin";
+        llmModelInput.value = LLM_DEFAULTS[provider].model;
+        llmBaseUrlInput.value = LLM_DEFAULTS[provider].baseUrl;
+        if (llmBaseUrlField) llmBaseUrlField.classList.toggle("hidden", provider !== "nim");
+        setLlmStatus("Unsaved changes — click Save settings to use this provider.");
+    }
+
+    function saveLlmSettings() {
+        const provider = llmProviderSelect ? llmProviderSelect.value : "builtin";
+        const apiKey = llmApiKeyInput ? llmApiKeyInput.value.trim() : "";
+        if (provider !== "builtin" && !apiKey) {
+            setLlmStatus("Add an API key before saving this provider.", true);
+            return;
+        }
+        currentLlmSettings = {
+            provider,
+            apiKey,
+            model: llmModelInput ? llmModelInput.value.trim() : "",
+            baseUrl: llmBaseUrlInput ? llmBaseUrlInput.value.trim() : ""
+        };
+        try {
+            localStorage.setItem(LLM_STORAGE_KEY, JSON.stringify(currentLlmSettings));
+            setLlmStatus(
+                provider === "builtin"
+                    ? "Saved. Using the built-in guide."
+                    : `${LLM_DEFAULTS[provider].label} saved in this browser.`
+            );
+        } catch (err) {
+            setLlmStatus("Browser storage is unavailable; settings apply for this session only.", true);
+        }
+    }
+
+    function clearLlmSettings() {
+        currentLlmSettings = { provider: "builtin", apiKey: "", model: "", baseUrl: "" };
+        try { localStorage.removeItem(LLM_STORAGE_KEY); } catch (err) { /* storage unavailable */ }
+        applyLlmSettingsToForm();
+        setLlmStatus("API key cleared. Using the built-in guide.");
+    }
+
+    if (llmSettingsToggle && llmSettingsPanel) {
+        llmSettingsToggle.addEventListener("click", () => {
+            const isOpen = llmSettingsPanel.classList.toggle("hidden") === false;
+            llmSettingsToggle.setAttribute("aria-expanded", String(isOpen));
+        });
+    }
+    if (llmProviderSelect) llmProviderSelect.addEventListener("change", handleProviderChange);
+    if (llmSaveButton) llmSaveButton.addEventListener("click", saveLlmSettings);
+    if (llmClearButton) llmClearButton.addEventListener("click", clearLlmSettings);
+    loadLlmSettings();
+
     let currentChatLang = "auto";
     let isRecording = false;
     let speechRecognition = null;
@@ -1171,21 +1314,27 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    const dockItems = dockTabButtons;
-    const dock = document.getElementById("floating-dock");
     if (dock && dockItems.length && !prefersReducedMotion) {
+        const resetDockItems = () => {
+            dockItems.forEach(item => {
+                item.style.removeProperty("--dock-scale");
+                item.style.removeProperty("--dock-lift");
+                item.style.removeProperty("--dock-proximity");
+            });
+        };
+
         dock.addEventListener("mousemove", (e) => {
             dockItems.forEach(item => {
                 const bounds = item.getBoundingClientRect();
                 const offset = e.clientX - (bounds.left + bounds.width / 2);
-                const proximity = 1 - Math.abs(offset) / 100;
-                const scale = proximity > 0 ? 1 + proximity * 0.5 : 1;
-                item.style.setProperty("--dock-scale", scale.toFixed(3));
+                const proximity = Math.max(0, 1 - Math.abs(offset) / 110);
+                item.style.setProperty("--dock-proximity", proximity.toFixed(3));
+                item.style.setProperty("--dock-scale", (1 + proximity * 0.5).toFixed(3));
+                item.style.setProperty("--dock-lift", `${(-proximity * 9).toFixed(2)}px`);
             });
         });
-        dock.addEventListener("mouseleave", () => {
-            dockItems.forEach(item => item.style.removeProperty("--dock-scale"));
-        });
+        dock.addEventListener("mouseleave", resetDockItems);
+        window.addEventListener("blur", resetDockItems);
     }
 
     function syncDockActiveState() {
@@ -1351,14 +1500,28 @@ document.addEventListener("DOMContentLoaded", () => {
             body: JSON.stringify({
                 message: msg,
                 language: currentChatLang,
-                context: context
+                context: context,
+                ...(currentLlmSettings.provider !== "builtin" && currentLlmSettings.apiKey
+                    ? {
+                        provider: currentLlmSettings.provider,
+                        api_key: currentLlmSettings.apiKey,
+                        model: currentLlmSettings.model,
+                        base_url: currentLlmSettings.baseUrl
+                    }
+                    : {})
             })
         })
         .then(r => r.json())
         .then(d => {
             removeTypingIndicator(typingIndicator);
+            if (d.provider_used && telemetryRibbonText) {
+                telemetryRibbonText.textContent = d.model_used
+                    ? `${d.provider_used} · ${d.model_used}`
+                    : `${d.provider_used} · Session synced`;
+            }
             if (d.success) {
                 appendMessage("bot", d.response_markdown || d.reply, "SuperClarity AI", d.language_name, d.speech_text);
+                if (d.notice) appendMessage("bot", `*${d.notice}*`, "Notice", "Info");
             } else {
                 appendMessage("bot", d.error || "I couldn't answer that just now. Please try again.", "SuperClarity AI");
             }
