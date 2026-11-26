@@ -481,6 +481,7 @@
                         <button type="button" class="btn-apply-adjustments" id="btn-apply-sliders">
                             <i class="fa-solid fa-check"></i> Apply Adjustments
                         </button>
+                        <span class="studio-action-status" id="studio-adjust-status" role="status"></span>
                     </div>
 
                     <!-- Download Studio Output -->
@@ -510,6 +511,7 @@
                         <button type="button" class="btn-enhance-small" id="btn-run-model-comparison">
                             <i class="fa-solid fa-play"></i> Run All 4 Models
                         </button>
+                        <span class="lab-run-summary" id="lab-run-summary" role="status"></span>
                     </div>
                 </div>
 
@@ -517,6 +519,7 @@
                 <div class="model-lab-grid" id="model-lab-grid">
                     <div class="model-lab-card" data-model="realesrgan">
                         <div class="lab-card-header">
+                            <span class="lab-run-status" id="lab-status-realesrgan">Ready</span>
                             <span class="model-title">Real-ESRGAN (SRVGGNet)</span>
                             <span class="rec-badge"><i class="fa-solid fa-star"></i> Recommended</span>
                         </div>
@@ -536,6 +539,7 @@
 
                     <div class="model-lab-card" data-model="edsr">
                         <div class="lab-card-header">
+                            <span class="lab-run-status" id="lab-status-edsr">Ready</span>
                             <span class="model-title">EDSR (Deep Residual)</span>
                             <span class="tag-info">Residual Baseline</span>
                         </div>
@@ -555,6 +559,7 @@
 
                     <div class="model-lab-card" data-model="srcnn">
                         <div class="lab-card-header">
+                            <span class="lab-run-status" id="lab-status-srcnn">Ready</span>
                             <span class="model-title">SRCNN (Classic 3-Layer)</span>
                             <span class="tag-warn">CNN Baseline</span>
                         </div>
@@ -574,6 +579,7 @@
 
                     <div class="model-lab-card" data-model="bicubic">
                         <div class="lab-card-header">
+                            <span class="lab-run-status" id="lab-status-bicubic">Ready</span>
                             <span class="model-title">Bicubic Interpolation</span>
                             <span class="tag-warn">No AI</span>
                         </div>
@@ -991,6 +997,45 @@
                 <i class="fa-solid fa-link"></i>
                 <span id="telemetry-ribbon-text">Session synced</span>
             </span>
+            <button type="button" class="assistant-settings-toggle" id="llm-settings-toggle" title="AI provider settings" aria-label="AI provider settings" aria-expanded="false">
+                <i class="fa-solid fa-key"></i>
+            </button>
+        </div>
+
+        <div class="assistant-settings hidden" id="llm-settings">
+            <div class="assistant-settings-title">
+                <i class="fa-solid fa-plug"></i>
+                <span>Connect your AI provider</span>
+            </div>
+            <p class="assistant-settings-hint">Keys stay in this browser and are sent only with your chat message. Nothing is stored on the server.</p>
+            <div class="assistant-settings-grid">
+                <label>
+                    <span>Provider</span>
+                    <select id="llm-provider">
+                        <option value="builtin">Built-in guide (no key)</option>
+                        <option value="groq">Groq API</option>
+                        <option value="gemini">Gemini API</option>
+                        <option value="nim">NVIDIA NIM</option>
+                    </select>
+                </label>
+                <label>
+                    <span>API key</span>
+                    <input type="password" id="llm-api-key" placeholder="Paste your API key" autocomplete="off" spellcheck="false">
+                </label>
+                <label>
+                    <span>Model</span>
+                    <input type="text" id="llm-model" placeholder="Model name" autocomplete="off" spellcheck="false">
+                </label>
+                <label id="llm-base-url-field">
+                    <span>Base URL <small>(NVIDIA NIM)</small></span>
+                    <input type="text" id="llm-base-url" placeholder="https://integrate.api.nvidia.com/v1" autocomplete="off" spellcheck="false">
+                </label>
+            </div>
+            <div class="assistant-settings-actions">
+                <button type="button" class="llm-btn llm-btn--save" id="llm-save">Save settings</button>
+                <button type="button" class="llm-btn llm-btn--clear" id="llm-clear">Clear key</button>
+                <span class="assistant-settings-status" id="llm-settings-status"></span>
+            </div>
         </div>
 
         <div class="assistant-quick-prompts" aria-label="Suggested questions">
