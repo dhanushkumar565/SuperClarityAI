@@ -8,7 +8,7 @@ import time
 import math
 import numpy as np
 import cv2
-from PIL import Image, ImageEnhance, ImageFilter
+from PIL import Image, ImageEnhance
 
 try:
     import torch
@@ -377,13 +377,29 @@ class SupplierClarityUpscaler:
     @staticmethod
     def _apply_unsharp_mask(pil_img: Image.Image, radius: float = 1.0, strength: float = 1.15) -> Image.Image:
         """
-        Enhances edge definition around logos, product labels, and seams
-        using an unsharp masking convolution filter.
+        Detail-aware clarity pass for the upscaled output.
+
+        The old full-RGB unsharp mask amplified compression noise in flat
+        regions and often introduced halo/colour fringing. This replacement
+        works on luminance only, caps the high-pass correction, and scales it
+        by local edge energy so real text/edges get clearer while smooth areas
+        stay clean. The public sharpen flag and strength semantics are unchanged.
         """
-        blurred = pil_img.filter(ImageFilter.GaussianBlur(radius=radius))
-        # High pass = Original - Blurred
-        img_np = np.array(pil_img, dtype=np.float32)
-        blur_np = np.array(blurred, dtype=np.float32)
-        high_pass = img_np - blur_np
-        sharpened = np.clip(img_np + strength * high_pass, 0, 255).astype(np.uint8)
-        return Image.fromarray(sharpened)
+        rgb = np.array(pil_img.convert("RGB"))
+        ycc = cv2.cvtColor(rgb, cv2.COLOR_RGB2YCrCb)
+        luma = ycc[:, :, 0].astype(np.float32)
+
+        blurred = cv2.GaussianBlur(luma, (0, 0), radius)
+        high_pass = np.clip(luma - blurred, -60.0, 60.0)
+
+        local_mean = cv2.GaussianBlur(luma, (0, 0), radius * 3.0)
+        local_variance = cv2.GaussianBlur(
+            (luma - local_mean) ** 2, (0, 0), radius * 3.0
+        )
+        edge_gate = np.clip((local_variance - 10.0) / 290.0, 0.0, 1.0)
+
+        gain = float(np.clip(strength * 1.3, 0.5, 1.6))
+        enhanced_luma = np.clip(luma + gain * high_pass * edge_gate, 0, 255).astype(np.uint8)
+
+        ycc[:, :, 0] = enhanced_luma
+        return Image.fromarray(cv2.cvtColor(ycc, cv2.COLOR_YCrCb2RGB))
