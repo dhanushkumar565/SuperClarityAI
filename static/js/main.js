@@ -23,8 +23,8 @@ document.addEventListener("DOMContentLoaded", () => {
     // =================================================================
     // DOM REFERENCES: NAVIGATION & TABS
     // =================================================================
-    const tabNavButtons = document.querySelectorAll(".tab-nav-btn");
     const tabContents = document.querySelectorAll(".tab-content");
+    const dockTabButtons = document.querySelectorAll("[data-dock-tab]");
     const btnThemeToggle = document.getElementById("btn-theme-toggle");
 
     // =================================================================
@@ -176,7 +176,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const chatBackdrop = document.getElementById("chat-backdrop");
     const chatDrawer = document.getElementById("chat-drawer");
-    const btnHeaderAssistant = document.getElementById("btn-header-assistant");
     const btnChatLauncher = document.getElementById("chatbot-launcher");
     const btnCloseDrawer = document.getElementById("btn-close-drawer");
     const chatMessages = document.getElementById("chat-messages");
@@ -188,42 +187,45 @@ document.addEventListener("DOMContentLoaded", () => {
     const telemetryRibbonText = document.getElementById("telemetry-ribbon-text");
     const chatChips = document.querySelectorAll(".chat-chip");
 
-    // Top Tab Assistant References
-    const tabChatMessages = document.getElementById("tab-chat-messages");
-    const tabChatTextInput = document.getElementById("tab-chat-text-input");
-    const btnTabChatSend = document.getElementById("btn-tab-chat-send");
-    const btnTabVoiceToggle = document.getElementById("btn-tab-voice-toggle");
-    const tabVoiceStatusBar = document.getElementById("tab-voice-status-bar");
-    const tabChatLangSelect = document.getElementById("tab-chat-lang-select");
-    const tabTelemetryRibbonText = document.getElementById("tab-telemetry-ribbon-text");
-    const tabChatChips = document.querySelectorAll(".tab-chat-chip");
-
     // =================================================================
     // 1. TAB ROUTING & THEME TOGGLE
     // =================================================================
-    tabNavButtons.forEach(btn => {
+    function activateTab(targetTab) {
+        if (!targetTab) return;
+        dockTabButtons.forEach(b => b.classList.toggle("is-active", b.dataset.dockTab === targetTab));
+        tabContents.forEach(c => c.classList.toggle("active", c.id === targetTab));
+
+        // Tab-specific initializers
+        if (targetTab === "tab-catalog") {
+            loadCatalogItems();
+        } else if (targetTab === "tab-studio" && activeEnhancedImageB64) {
+            studioPreviewImg.src = activeEnhancedImageB64;
+            currentStudioImageB64 = activeEnhancedImageB64;
+        } else if (targetTab === "tab-export" && activeEnhancedImageB64) {
+            exportPreviewImg.src = activeEnhancedImageB64;
+        }
+    }
+
+    const dockToggle = document.getElementById("floating-dock-toggle");
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    dockTabButtons.forEach(btn => {
         btn.addEventListener("click", () => {
-            const targetTab = btn.dataset.tab;
-            tabNavButtons.forEach(b => b.classList.remove("active"));
-            tabContents.forEach(c => c.classList.remove("active"));
-
-            btn.classList.add("active");
-            const targetElem = document.getElementById(targetTab);
-            if (targetElem) {
-                targetElem.classList.add("active");
+            activateTab(btn.dataset.dockTab);
+            if (dock && dock.classList.contains("is-open")) {
+                dock.classList.remove("is-open");
+                if (dockToggle) dockToggle.setAttribute("aria-expanded", "false");
             }
-
-            // Tab-specific initializers
-            if (targetTab === "tab-catalog") {
-                loadCatalogItems();
-            } else if (targetTab === "tab-studio" && activeEnhancedImageB64) {
-                studioPreviewImg.src = activeEnhancedImageB64;
-                currentStudioImageB64 = activeEnhancedImageB64;
-            } else if (targetTab === "tab-export" && activeEnhancedImageB64) {
-                exportPreviewImg.src = activeEnhancedImageB64;
-            }
+            window.scrollTo({ top: 0, behavior: prefersReducedMotion ? "auto" : "smooth" });
         });
     });
+
+    if (dockToggle && dock) {
+        dockToggle.addEventListener("click", () => {
+            const isOpen = dock.classList.toggle("is-open");
+            dockToggle.setAttribute("aria-expanded", String(isOpen));
+        });
+    }
 
     // Theme Toggle
     if (btnThemeToggle) {
@@ -528,7 +530,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Update assistant telemetry ribbon
         if (telemetryRibbonText) {
-            telemetryRibbonText.textContent = `Coupled to active session: ${data.scale}× (${data.enhanced_resolution}), Latency: ${data.latency_ms}ms`;
+            telemetryRibbonText.textContent = `Session synced · ${data.scale}× · ${data.latency_ms}ms`;
         }
     }
 
@@ -1142,7 +1144,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // =================================================================
     // 14. MULTILINGUAL ASSISTANT (Chat & Web Speech API)
     // =================================================================
-    let currentChatLang = "en";
+    let currentChatLang = "auto";
     let isRecording = false;
     let speechRecognition = null;
 
@@ -1158,7 +1160,6 @@ document.addEventListener("DOMContentLoaded", () => {
         if (chatBackdrop) chatBackdrop.classList.add("hidden");
     }
 
-    if (btnHeaderAssistant) btnHeaderAssistant.addEventListener("click", openAssistant);
     if (btnChatLauncher) btnChatLauncher.addEventListener("click", openAssistant);
 
     if (btnCloseDrawer) btnCloseDrawer.addEventListener("click", closeAssistant);
@@ -1170,27 +1171,15 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // Floating dock navigation
-    document.querySelectorAll("[data-dock-tab]").forEach(button => {
-        button.addEventListener("click", () => {
-            const tabButton = document.querySelector(`[data-tab="${button.dataset.dockTab}"]`);
-            if (!tabButton) return;
-            tabButton.click();
-            window.scrollTo({ top: 0, behavior: "smooth" });
-        });
-    });
-
-    const dockAssistantButton = document.querySelector('[data-dock-action="assistant"]');
-    if (dockAssistantButton) dockAssistantButton.addEventListener("click", openAssistant);
-
-    const dockItems = document.querySelectorAll(".floating-dock__item");
+    const dockItems = dockTabButtons;
     const dock = document.getElementById("floating-dock");
-    if (dock && dockItems.length) {
+    if (dock && dockItems.length && !prefersReducedMotion) {
         dock.addEventListener("mousemove", (e) => {
             dockItems.forEach(item => {
                 const bounds = item.getBoundingClientRect();
-                const distance = Math.abs(e.clientX - (bounds.left + bounds.width / 2));
-                const scale = 1 + Math.max(0, 1 - distance / 90) * 0.28;
+                const offset = e.clientX - (bounds.left + bounds.width / 2);
+                const proximity = 1 - Math.abs(offset) / 100;
+                const scale = proximity > 0 ? 1 + proximity * 0.5 : 1;
                 item.style.setProperty("--dock-scale", scale.toFixed(3));
             });
         });
@@ -1200,49 +1189,28 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function syncDockActiveState() {
-        const activeTab = document.querySelector(".tab-nav-btn.active");
+        const activeTab = document.querySelector(".tab-content.active");
         dockItems.forEach(item => {
-            const isAssistant = item.dataset.dockAction === "assistant";
-            item.classList.toggle("is-active", !isAssistant && activeTab &&
-                item.dataset.dockTab === activeTab.dataset.tab);
+            item.classList.toggle("is-active", !!activeTab && item.dataset.dockTab === activeTab.id);
         });
     }
 
-    tabNavButtons.forEach(button => button.addEventListener("click", syncDockActiveState));
     syncDockActiveState();
 
     if (chatLangSelect) {
         chatLangSelect.addEventListener("change", (e) => {
             currentChatLang = e.target.value;
-            if (tabChatLangSelect) tabChatLangSelect.value = currentChatLang;
-        });
-    }
-
-    if (tabChatLangSelect) {
-        tabChatLangSelect.addEventListener("change", (e) => {
-            currentChatLang = e.target.value;
-            if (chatLangSelect) chatLangSelect.value = currentChatLang;
         });
     }
 
     chatChips.forEach(chip => {
         chip.addEventListener("click", () => {
             if (chatTextInput) chatTextInput.value = chip.dataset.query;
-            if (tabChatTextInput) tabChatTextInput.value = chip.dataset.query;
-            sendChatMessage();
-        });
-    });
-
-    tabChatChips.forEach(chip => {
-        chip.addEventListener("click", () => {
-            if (chatTextInput) chatTextInput.value = chip.dataset.query;
-            if (tabChatTextInput) tabChatTextInput.value = chip.dataset.query;
             sendChatMessage();
         });
     });
 
     if (btnChatSend) btnChatSend.addEventListener("click", () => sendChatMessage());
-    if (btnTabChatSend) btnTabChatSend.addEventListener("click", () => sendChatMessage());
 
     if (chatTextInput) {
         chatTextInput.addEventListener("keydown", (e) => {
@@ -1253,23 +1221,122 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    if (tabChatTextInput) {
-        tabChatTextInput.addEventListener("keydown", (e) => {
-            if (e.key === "Enter") {
-                e.preventDefault();
-                sendChatMessage();
+    const escapeHtml = value => String(value === undefined || value === null ? "" : value)
+        .replace(/[&<>"']/g, char => ({
+            "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+        }[char]));
+
+    function renderInline(value) {
+        return escapeHtml(value)
+            .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+            .replace(/\*([^*]+)\*/g, "<em>$1</em>")
+            .replace(/`([^`]+)`/g, "<code>$1</code>");
+    }
+
+    function renderMarkdown(value) {
+        const lines = String(value || "").split("\n");
+        let html = "";
+        let listType = null;
+        let tableRows = [];
+
+        const closeList = () => {
+            if (!listType) return;
+            html += listType === "ul" ? "</ul>" : "</ol>";
+            listType = null;
+        };
+
+        const flushTable = () => {
+            if (!tableRows.length) return;
+            const rows = tableRows.filter(row => !/^\|[\s:|-]+\|$/.test(row));
+            const cells = rows.map(row => row.replace(/^\||\|$/g, "").split("|").map(cell => cell.trim()));
+            if (cells.length) {
+                const [head, ...body] = cells;
+                html += '<div class="chat-md-table-wrap"><table class="chat-md-table"><thead><tr>' +
+                    head.map(cell => `<th>${renderInline(cell)}</th>`).join("") +
+                    "</tr></thead><tbody>" +
+                    body.map(row => `<tr>${row.map(cell => `<td>${renderInline(cell)}</td>`).join("")}</tr>`).join("") +
+                    "</tbody></table></div>";
             }
+            tableRows = [];
+        };
+
+        lines.forEach(raw => {
+            const line = raw.trim();
+            if (!line) {
+                closeList();
+                flushTable();
+                return;
+            }
+            if (line.startsWith("|")) {
+                closeList();
+                tableRows.push(line);
+                return;
+            }
+            flushTable();
+
+            const heading = line.match(/^(#{1,4})\s+(.*)$/);
+            if (heading) {
+                closeList();
+                const level = Math.min(heading[1].length + 1, 5);
+                html += `<h${level} class="chat-md-heading">${renderInline(heading[2])}</h${level}>`;
+                return;
+            }
+            const unordered = line.match(/^[-*]\s+(.*)$/);
+            if (unordered) {
+                if (listType !== "ul") {
+                    closeList();
+                    html += '<ul class="chat-md-list">';
+                    listType = "ul";
+                }
+                html += `<li>${renderInline(unordered[1])}</li>`;
+                return;
+            }
+            const ordered = line.match(/^\d+\.\s+(.*)$/);
+            if (ordered) {
+                if (listType !== "ol") {
+                    closeList();
+                    html += '<ol class="chat-md-list">';
+                    listType = "ol";
+                }
+                html += `<li>${renderInline(ordered[1])}</li>`;
+                return;
+            }
+            closeList();
+            html += `<p class="chat-md-p">${renderInline(line)}</p>`;
         });
+
+        closeList();
+        flushTable();
+        return html;
+    }
+
+    function showTypingIndicator() {
+        if (!chatMessages) return null;
+        const indicator = document.createElement("div");
+        indicator.className = "chat-bubble bot-bubble typing-indicator";
+        indicator.innerHTML = `
+            <div class="assistant-message-avatar"><i class="fa-solid fa-robot"></i></div>
+            <div class="chat-bubble-main">
+                <div class="bubble-header"><span class="sender-name">SuperClarity AI</span></div>
+                <div class="typing-dots"><span></span><span></span><span></span></div>
+            </div>
+        `;
+        chatMessages.appendChild(indicator);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+        return indicator;
+    }
+
+    function removeTypingIndicator(indicator) {
+        if (indicator && indicator.parentNode) indicator.remove();
     }
 
     function sendChatMessage() {
-        const msg = (chatTextInput ? chatTextInput.value.trim() : "") ||
-                    (tabChatTextInput ? tabChatTextInput.value.trim() : "");
+        const msg = chatTextInput ? chatTextInput.value.trim() : "";
         if (!msg) return;
 
         appendMessage("user", msg, "You");
         if (chatTextInput) chatTextInput.value = "";
-        if (tabChatTextInput) tabChatTextInput.value = "";
+        const typingIndicator = showTypingIndicator();
 
         const context = {
             active_sample: selectedSampleId,
@@ -1289,40 +1356,46 @@ document.addEventListener("DOMContentLoaded", () => {
         })
         .then(r => r.json())
         .then(d => {
+            removeTypingIndicator(typingIndicator);
             if (d.success) {
                 appendMessage("bot", d.response_markdown || d.reply, "SuperClarity AI", d.language_name, d.speech_text);
             } else {
                 appendMessage("bot", d.error || "I couldn't answer that just now. Please try again.", "SuperClarity AI");
             }
         })
-        .catch(err => console.error("Chat error:", err));
+        .catch(err => {
+            removeTypingIndicator(typingIndicator);
+            console.error("Chat error:", err);
+            appendMessage("bot", "Sorry, I couldn't reach the assistant. Please try again.", "SuperClarity AI");
+        });
     }
 
     function appendMessage(sender, text, senderName, langName = "", speechText = "") {
+        const isUser = sender === "user";
+        const avatar = isUser
+            ? '<div class="assistant-message-avatar user-avatar"><i class="fa-solid fa-user"></i></div>'
+            : '<div class="assistant-message-avatar"><i class="fa-solid fa-robot"></i></div>';
+        const body = isUser
+            ? `<p class="chat-md-p">${escapeHtml(text)}</p>`
+            : renderMarkdown(text);
         const bubbleHtml = `
-            <div class="bubble-header">
-                <span class="sender-name">${senderName}</span>
-                ${langName ? `<span class="bubble-lang">${langName}</span>` : ""}
+            ${avatar}
+            <div class="chat-bubble-main">
+                <div class="bubble-header">
+                    <span class="sender-name">${escapeHtml(senderName)}</span>
+                    ${langName ? `<span class="bubble-lang">${escapeHtml(langName)}</span>` : ""}
+                </div>
+                <div class="bubble-body">${body}</div>
+                ${speechText ? `<button type="button" class="btn-speech-play" data-speech="${encodeURIComponent(speechText)}"><i class="fa-solid fa-volume-high"></i> Listen</button>` : ""}
             </div>
-            <div class="bubble-body">${text}</div>
-            ${speechText ? `<button type="button" class="btn-speech-play" data-speech="${encodeURIComponent(speechText)}"><i class="fa-solid fa-volume-high"></i> Listen</button>` : ""}
         `;
 
-        if (chatMessages) {
-            const div = document.createElement("div");
-            div.className = `chat-bubble ${sender === "user" ? "user-bubble" : "bot-bubble"}`;
-            div.innerHTML = bubbleHtml;
-            chatMessages.appendChild(div);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
-
-        if (tabChatMessages) {
-            const divTab = document.createElement("div");
-            divTab.className = `chat-bubble ${sender === "user" ? "user-bubble" : "bot-bubble"}`;
-            divTab.innerHTML = bubbleHtml;
-            tabChatMessages.appendChild(divTab);
-            tabChatMessages.scrollTop = tabChatMessages.scrollHeight;
-        }
+        if (!chatMessages) return;
+        const div = document.createElement("div");
+        div.className = `chat-bubble ${isUser ? "user-bubble" : "bot-bubble"}`;
+        div.innerHTML = bubbleHtml;
+        chatMessages.appendChild(div);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
     }
 
     function setupSpeechListeners(container) {
@@ -1338,7 +1411,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     setupSpeechListeners(chatMessages);
-    setupSpeechListeners(tabChatMessages);
 
     // Web Speech API STT
     const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -1350,16 +1422,13 @@ document.addEventListener("DOMContentLoaded", () => {
         speechRecognition.onresult = (e) => {
             const transcript = e.results[0][0].transcript;
             if (chatTextInput) chatTextInput.value = transcript;
-            if (tabChatTextInput) tabChatTextInput.value = transcript;
             sendChatMessage();
         };
 
         speechRecognition.onend = () => {
             isRecording = false;
             if (btnVoiceToggle) btnVoiceToggle.classList.remove("recording");
-            if (btnTabVoiceToggle) btnTabVoiceToggle.classList.remove("recording");
             if (voiceStatusBar) voiceStatusBar.classList.add("hidden");
-            if (tabVoiceStatusBar) tabVoiceStatusBar.classList.add("hidden");
         };
 
         const toggleRecording = () => {
@@ -1368,16 +1437,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 speechRecognition.start();
                 isRecording = true;
                 if (btnVoiceToggle) btnVoiceToggle.classList.add("recording");
-                if (btnTabVoiceToggle) btnTabVoiceToggle.classList.add("recording");
                 if (voiceStatusBar) voiceStatusBar.classList.remove("hidden");
-                if (tabVoiceStatusBar) tabVoiceStatusBar.classList.remove("hidden");
             } else {
                 speechRecognition.stop();
             }
         };
 
         if (btnVoiceToggle) btnVoiceToggle.addEventListener("click", toggleRecording);
-        if (btnTabVoiceToggle) btnTabVoiceToggle.addEventListener("click", toggleRecording);
     }
 
 });
